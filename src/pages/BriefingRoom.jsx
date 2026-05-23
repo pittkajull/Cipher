@@ -99,11 +99,18 @@ export default function BriefingRoom() {
   const statusRef = useRef(null)
 
   useEffect(() => {
+    // Set initial states explicitly
+    gsap.set(titleRef.current, { opacity: 0 })
+    gsap.set(subtitleRef.current, { opacity: 0 })
+    gsap.set(taglineRef.current, { opacity: 0, y: 10 })
+    gsap.set(statusRef.current, { opacity: 0 })
+    gsap.set(ctaRef.current, { opacity: 0, y: 20 })
+
     const tl = gsap.timeline({ delay: 0.3 })
 
     // Title: CIPHER text with typing
-    tl.from(titleRef.current, {
-      opacity: 0,
+    tl.to(titleRef.current, {
+      opacity: 1,
       duration: 0.1,
     })
     .to(titleRef.current, {
@@ -122,7 +129,7 @@ export default function BriefingRoom() {
     })
 
     // Subtitle typing
-    .from(subtitleRef.current, { opacity: 0, duration: 0.1 }, '-=0.2')
+    .to(subtitleRef.current, { opacity: 1, duration: 0.1 }, '-=0.2')
     .to(subtitleRef.current, {
       duration: 1.2,
       text: {
@@ -133,15 +140,15 @@ export default function BriefingRoom() {
     })
 
     // Tagline fade in
-    .from(taglineRef.current, {
-      opacity: 0,
-      y: 10,
+    .to(taglineRef.current, {
+      opacity: 1,
+      y: 0,
       duration: 0.6,
       ease: 'power2.out',
     }, '+=0.3')
 
     // Status text typing
-    .from(statusRef.current, { opacity: 0, duration: 0.1 })
+    .to(statusRef.current, { opacity: 1, duration: 0.1 })
     .to(statusRef.current, {
       duration: 0.8,
       text: {
@@ -152,10 +159,9 @@ export default function BriefingRoom() {
     })
 
     // CTA button appear
-    .from(ctaRef.current, {
-      opacity: 0,
-      y: 20,
-      scale: 0.9,
+    .to(ctaRef.current, {
+      opacity: 1,
+      y: 0,
       duration: 0.5,
       ease: 'back.out(1.4)',
     }, '+=0.2')
@@ -193,21 +199,17 @@ export default function BriefingRoom() {
             ref={titleRef}
             className="font-mono text-7xl md:text-9xl font-bold tracking-wider text-[#00b4d8]"
             style={{ textShadow: '0 0 20px rgba(0, 180, 216, 0.3)' }}
-          >
-            &nbsp;
-          </h1>
+          />
         </div>
 
         {/* Subtitle */}
         <p
           ref={subtitleRef}
           className="font-mono text-sm md:text-base tracking-[0.3em] text-[#8892a4] mb-6"
-        >
-          &nbsp;
-        </p>
+        />
 
         {/* Tagline */}
-        <p ref={taglineRef} className="text-[#4a5568] text-sm mb-2 opacity-0">
+        <p ref={taglineRef} className="text-[#4a5568] text-sm mb-2">
           Welcome, Agent. Your first briefing awaits.
         </p>
 
@@ -215,12 +217,10 @@ export default function BriefingRoom() {
         <p
           ref={statusRef}
           className="font-mono text-xs text-[#00b4d8]/60 mb-10"
-        >
-          &nbsp;
-        </p>
+        />
 
         {/* CTA */}
-        <div ref={ctaRef} className="opacity-0">
+        <div ref={ctaRef}>
           <button
             onClick={handleEnter}
             className="group relative font-mono text-sm tracking-widest bg-transparent border border-[#00b4d8]/40 text-[#00b4d8] px-10 py-4 rounded hover:bg-[#00b4d8]/10 hover:border-[#00b4d8] hover:shadow-[0_0_20px_rgba(0,180,216,0.2)] active:scale-[0.97] transition-all cursor-pointer"
