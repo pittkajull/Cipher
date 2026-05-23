@@ -30,29 +30,23 @@ const SPECIALIZATIONS = [
 export default function AgentSetup() {
   const navigate = useNavigate()
   const containerRef = useRef(null)
-  const nameInputRef = useRef(null)
   const [codename, setCodename] = useState('')
   const [selectedSpec, setSelectedSpec] = useState(null)
-  const [step, setStep] = useState(1) // 1 = name, 2 = specialization
+  const [step, setStep] = useState(1)
+  const [visible, setVisible] = useState(false)
+  const [step2Visible, setStep2Visible] = useState(false)
 
-  // Entrance animation
   useEffect(() => {
-    const tl = gsap.timeline()
-
-    tl.from('.setup-header', { opacity: 0, y: -20, duration: 0.5, ease: 'power2.out' })
-      .from('.setup-label', { opacity: 0, x: -20, duration: 0.4, ease: 'power2.out' })
-      .from('.setup-input', { opacity: 0, y: 10, duration: 0.4, ease: 'power2.out' })
-
-    return () => tl.kill()
+    // Small delay then fade in
+    const t = setTimeout(() => setVisible(true), 100)
+    return () => clearTimeout(t)
   }, [])
 
-  // Step 2 entrance
   useEffect(() => {
     if (step === 2) {
-      const tl = gsap.timeline()
-      tl.from('.spec-title', { opacity: 0, x: -20, duration: 0.4, ease: 'power2.out' })
-        .from('.spec-card', { opacity: 0, y: 30, duration: 0.4, stagger: 0.12, ease: 'power2.out' })
-        .from('.setup-cta', { opacity: 0, y: 20, duration: 0.4, ease: 'back.out(1.4)' })
+      setStep2Visible(false)
+      const t = setTimeout(() => setStep2Visible(true), 50)
+      return () => clearTimeout(t)
     }
   }, [step])
 
@@ -60,16 +54,10 @@ export default function AgentSetup() {
     e.preventDefault()
     if (!codename.trim()) return
     setStep(2)
-    setTimeout(() => nameInputRef.current?.blur(), 100)
   }
 
   function handleSelectSpec(spec) {
     setSelectedSpec(spec)
-    // Scale pop animation
-    const card = document.querySelector(`[data-spec="${spec.id}"]`)
-    if (card) {
-      gsap.fromTo(card, { scale: 0.95 }, { scale: 1, duration: 0.3, ease: 'back.out(2)' })
-    }
   }
 
   function handleInitialize() {
@@ -94,9 +82,17 @@ export default function AgentSetup() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div ref={containerRef} className="max-w-2xl w-full">
+      <div
+        ref={containerRef}
+        className="max-w-2xl w-full"
+        style={{
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
+        }}
+      >
         {/* Header */}
-        <div className="setup-header mb-10">
+        <div className="mb-10">
           <div className="inline-flex items-center gap-2 bg-[#00b4d8]/10 border border-[#00b4d8]/20 rounded px-3 py-1 mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-[#00b4d8] animate-pulse" />
             <span className="font-mono text-[10px] text-[#00b4d8] tracking-widest">AGENT REGISTRATION</span>
@@ -111,10 +107,10 @@ export default function AgentSetup() {
 
         {/* Step 1: Codename */}
         <form onSubmit={handleNameSubmit} className="mb-8">
-          <label className="setup-label block font-mono text-xs text-[#00b4d8] tracking-widest mb-3">
+          <label className="block font-mono text-xs text-[#00b4d8] tracking-widest mb-3">
             AGENT CODENAME
           </label>
-          <div className="setup-input relative">
+          <div className="relative">
             <span className="absolute left-0 top-1/2 -translate-y-1/2 font-mono text-[#00b4d8] text-sm">{'>'}</span>
             <input
               type="text"
@@ -144,8 +140,14 @@ export default function AgentSetup() {
 
         {/* Step 2: Specialization */}
         {step === 2 && (
-          <div>
-            <label className="spec-title block font-mono text-xs text-[#00b4d8] tracking-widest mb-4">
+          <div
+            style={{
+              opacity: step2Visible ? 1 : 0,
+              transform: step2Visible ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.5s ease-out, transform 0.5s ease-out',
+            }}
+          >
+            <label className="block font-mono text-xs text-[#00b4d8] tracking-widest mb-4">
               SELECT SPECIALIZATION
             </label>
 
@@ -155,9 +157,8 @@ export default function AgentSetup() {
                 return (
                   <button
                     key={spec.id}
-                    data-spec={spec.id}
                     onClick={() => handleSelectSpec(spec)}
-                    className={`spec-card text-left p-5 rounded-lg border transition-all cursor-pointer ${
+                    className={`text-left p-5 rounded-lg border transition-all cursor-pointer ${
                       isSelected
                         ? 'border-[#00b4d8] bg-[#00b4d8]/5 glow-cyan'
                         : 'border-[#1e2d3d] bg-[#0d1117] hover:border-[#1e2d3d]/80'
@@ -189,7 +190,7 @@ export default function AgentSetup() {
 
             {/* Initialize button */}
             {selectedSpec && (
-              <div className="setup-cta">
+              <div>
                 <button
                   onClick={handleInitialize}
                   className="w-full font-mono text-sm tracking-widest bg-[#00b4d8] text-[#080b0f] py-4 rounded hover:bg-[#00c8f0] active:scale-[0.98] transition-all cursor-pointer font-semibold glow-cyan-strong"

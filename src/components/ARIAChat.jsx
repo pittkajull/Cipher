@@ -77,7 +77,19 @@ Agen: ${msg}
 
 Balas sebagai ARIA. Maksimal 2-3 kalimat. Jangan beri jawaban langsung, bimbing Agen.`
 
-      const reply = await callGemini(prompt)
+      let reply
+      try {
+        reply = await callGemini(prompt)
+      } catch {
+        // Fallback ARIA responses
+        const fallbacks = [
+          "Agen, fokus pada elemen yang mencurigakan. Perhatikan detail yang tidak biasa.",
+          "Intel menunjukkan anomali. Cek kembali URL dan pengirimnya.",
+          "Kamu sudah dekat. Periksa lagi elemen yang belum kamu selidiki.",
+          "Instingmu bagus, Agen. Terus gali lebih dalam.",
+        ]
+        reply = fallbacks[Math.floor(Math.random() * fallbacks.length)]
+      }
       setMessages((prev) => [...prev, { role: 'assistant', content: reply }])
     } catch {
       setMessages((prev) => [

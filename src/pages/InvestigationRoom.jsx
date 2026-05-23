@@ -29,6 +29,7 @@ export default function InvestigationRoom() {
   const [showDebrief, setShowDebrief] = useState(false)
   const [ariaComment, setAriaComment] = useState('')
   const [clueFlash, setClueFlash] = useState(null)
+  const [visible, setVisible] = useState(false)
 
   const timerRef = useRef(null)
   const containerRef = useRef(null)
@@ -40,27 +41,20 @@ export default function InvestigationRoom() {
       navigate('/cases')
       return
     }
+    setTimeout(() => setVisible(true), 100)
   }, [caseData, agent, navigate])
 
-  // Entrance animation
+  // Briefing typing animation
   useEffect(() => {
-    if (!caseData) return
-
-    const tl = gsap.timeline()
-    tl.from('.hud-bar', { opacity: 0, y: -20, duration: 0.4, ease: 'power2.out' })
-      .from('.evidence-panel', { x: -40, opacity: 0, duration: 0.5, ease: 'power3.out' })
-      .from('.clue-panel', { x: 40, opacity: 0, duration: 0.5, ease: 'power3.out' }, '-=0.3')
-
-    // Briefing typing
-    if (briefingRef.current) {
-      tl.to(briefingRef.current, {
+    if (!caseData || !briefingRef.current) return
+    const t = setTimeout(() => {
+      gsap.to(briefingRef.current, {
         duration: 1.5,
         text: { value: caseData.brief, delimiter: '' },
         ease: 'none',
-      }, '-=0.3')
-    }
-
-    return () => tl.kill()
+      })
+    }, 600)
+    return () => clearTimeout(t)
   }, [caseData])
 
   // Timer
@@ -93,12 +87,6 @@ export default function InvestigationRoom() {
     if (clue) {
       setAriaComment(`Bagus, Agen. ${clue.description}. Terus selidiki.`)
       setTimeout(() => setAriaComment(''), 4000)
-    }
-
-    // GSAP clue found effect
-    const el = document.querySelector(`[data-clue-id="${clueId}"]`)
-    if (el) {
-      gsap.fromTo(el, { scale: 1.05 }, { scale: 1, duration: 0.3, ease: 'back.out(2)' })
     }
   }, [foundClues, caseData])
 
@@ -150,9 +138,17 @@ export default function InvestigationRoom() {
 
   return (
     <div className="min-h-screen px-4 py-4">
-      <div ref={containerRef} className="max-w-7xl mx-auto">
+      <div
+        ref={containerRef}
+        className="max-w-7xl mx-auto"
+        style={{
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'opacity 0.5s ease-out, transform 0.5s ease-out',
+        }}
+      >
         {/* HUD */}
-        <div className="hud-bar mb-4">
+        <div className="mb-4">
           <AgentHUD
             agent={agent}
             caseData={caseData}
@@ -167,13 +163,13 @@ export default function InvestigationRoom() {
             <span className="text-xs">🤖</span>
             <span className="font-mono text-[10px] text-[#00b4d8]">ARIA BRIEFING</span>
           </div>
-          <p ref={briefingRef} className="font-mono text-sm text-[#8892a4] min-h-[1.5em]">&nbsp;</p>
+          <p ref={briefingRef} className="font-mono text-sm text-[#8892a4] min-h-[1.5em]" />
         </div>
 
         {/* Main Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Left: Evidence */}
-          <div className="evidence-panel lg:col-span-2">
+          <div className="lg:col-span-2">
             {renderEvidence()}
 
             {/* Answer Choices */}
@@ -216,7 +212,7 @@ export default function InvestigationRoom() {
           </div>
 
           {/* Right: Clue Tracker + ARIA */}
-          <div className="clue-panel space-y-4">
+          <div className="space-y-4">
             <ClueTracker
               clues={caseData.clues}
               foundClues={foundClues}

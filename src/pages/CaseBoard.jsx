@@ -13,6 +13,99 @@ const THREAT_COLORS = {
 
 const EVIDENCE_ICONS = { email: '📧', website: '🌐', chat: '💬' }
 
+const FALLBACK_CASES = [
+  {
+    case_id: "CASE-101",
+    codename: "Operation Phantom Mail",
+    threat_level: "ROUTINE",
+    brief: "Karyawan PT Maju melaporkan email mencurigakan dari 'IT Support' yang meminta reset password.",
+    evidence: {
+      type: "email",
+      from_name: "IT Support",
+      from_email: "support@ptmaju-secure.com",
+      subject: "URGENT: Password Reset Required - Action Within 24 Hours",
+      body: "Dear Employee,\n\nOur security system has detected unusual activity on your account. You are required to reset your password immediately to avoid account suspension.\n\nClick the button below to verify your identity and create a new password. This link will expire in 24 hours.\n\nIf you do not reset your password, your account will be locked permanently.\n\nBest regards,\nIT Security Team\nPT Maju Indonesia",
+      cta_text: "Reset Password Now",
+      cta_url: "https://ptmaju-secure.com/verify?id=8a7b3c",
+      timestamp: "2024-01-15 09:32"
+    },
+    clues: [
+      { id: "clue_1", "element": "from_email", description: "Domain bukan domain resmi perusahaan" },
+      { id: "clue_2", "element": "cta_url", description: "URL mengarah ke domain mencurigakan" },
+      { id: "clue_3", "element": "body", description: "Tekanan urgensi dan ancaman akun" }
+    ],
+    answer: "Phishing Attack",
+    choices: ["Phishing Attack", "Malware Distribution", "Social Engineering", "Legitimate Email"],
+    debrief: {
+      verdict: "Phishing Attack Confirmed",
+      summary: "Email ini menggunakan domain palsu yang mirip domain asli perusahaan. URL mengarah ke halaman login palsu untuk mencuri kredensial karyawan.",
+      key_findings: ["Domain spoofing", "Fake urgency pressure", "Credential harvesting URL"],
+      tip: "Selalu verifikasi domain pengirim email. Domain resmi PT Maju adalah ptmaju.co.id, bukan ptmaju-secure.com."
+    },
+    xp_reward: 100
+  },
+  {
+    case_id: "CASE-202",
+    codename: "Operation Ghost Login",
+    threat_level: "ELEVATED",
+    brief: "Ditemukan halaman login bank yang menyalin tampilan situs resmi tetapi dengan URL berbeda.",
+    evidence: {
+      type: "website",
+      url: "https://bank-sentral.co.id/secure-login",
+      title: "Bank Sentral Indonesia - Internet Banking",
+      navbar_items: ["Berlay", "Transfer", "Pembayaran", "Bantuan"],
+      hero_title: "Login ke Internet Banking Anda",
+      hero_body: "Akses rekening Anda dengan aman. Masukkan email dan password untuk melanjutkan.",
+      form_fields: ["Email", "Password"],
+      submit_text: "Masuk Sekarang",
+      footer: "© 2024 Bank Sentral Indonesia. Semua hak dilindungi. | Syarat & Ketentuan | Kebijakan Privasi"
+    },
+    clues: [
+      { id: "clue_1", element: "url", description: "URL bukan domain resmi bank" },
+      { id: "clue_2", element: "footer", description: "Tidak ada link ke OJK atau LPS" },
+      { id: "clue_3", element: "form_fields", description: "Form sederhana tanpa 2FA" }
+    ],
+    answer: "Phishing Attack",
+    choices: ["Phishing Attack", "Malware Distribution", "Social Engineering", "Legitimate Website"],
+    debrief: {
+      verdict: "Fake Banking Website Detected",
+      summary: "Situs ini menyalin tampilan bank resmi tetapi menggunakan domain berbeda. Tujuannya adalah mencuri kredensial login nasabah.",
+      key_findings: ["Typosquatting domain", "No 2FA prompt", "Missing regulatory links"],
+      tip: "Selalu ketik URL bank langsung di browser. Jangan pernah login melalui link dari email atau SMS."
+    },
+    xp_reward: 150
+  },
+  {
+    case_id: "CASE-303",
+    codename: "Operation Sweet Talk",
+    threat_level: "CRITICAL",
+    brief: "Percakapan chat antara 'Manager' dan karyawan baru yang meminta transfer dana darurat.",
+    evidence: {
+      type: "chat",
+      messages: [
+        { sender: "Manager (HR)", text: "Halo, saya Manager HR. Ada urgent task dari direksi.", time: "14:02" },
+        { sender: "Karyawan Baru", text: "Baik Pak, ada yang bisa saya bantu?", time: "14:03" },
+        { sender: "Manager (HR)", text: "Ini rahasia ya. Direksi minta segera transfer 50jt ke rekening vendor baru. Ini nomor rekeningnya: 1234567890 a/n PT Sejahtera.", time: "14:04" },
+        { sender: "Karyawan Baru", text: "Baik Pak, saya proses sekarang.", time: "14:05" }
+      ]
+    },
+    clues: [
+      { id: "clue_1", element: "msg_0", description: "Tidak ada verifikasi identitas" },
+      { id: "clue_2", element: "msg_2", description: "Tekanan urgensi dan kerahasiaan" },
+      { id: "clue_3", element: "msg_2", description: "Permintaan transfer tidak biasa" }
+    ],
+    answer: "Social Engineering",
+    choices: ["Phishing Attack", "Malware Distribution", "Social Engineering", "Legitimate Request"],
+    debrief: {
+      verdict: "Business Email Compromise (BEC)",
+      summary: "Penyamaran sebagai atasan melalui chat untuk memanipulasi karyawan baru melakukan transfer dana ke rekening penipu.",
+      key_findings: ["Authority impersonation", "Urgency and secrecy pressure", "Unusual transfer request"],
+      tip: "Selalu verifikasi permintaan transfer melalui jalur resmi. Telepon langsung ke atasan, jangan percaya chat saja."
+    },
+    xp_reward: 200
+  }
+]
+
 function generateCasePrompt(difficulty, type) {
   return `Generate sebuah kasus investigasi cybersecurity untuk game CIPHER.
 Difficulty: ${difficulty}
@@ -67,8 +160,6 @@ const CASES_POOL = [
   { difficulty: 'ROUTINE', type: 'email' },
   { difficulty: 'ELEVATED', type: 'website' },
   { difficulty: 'CRITICAL', type: 'chat' },
-  { difficulty: 'ELEVATED', type: 'email' },
-  { difficulty: 'CLASSIFIED', type: 'website' },
 ]
 
 export default function CaseBoard() {
@@ -78,6 +169,8 @@ export default function CaseBoard() {
   const [cases, setCases] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [visible, setVisible] = useState(false)
+  const [cardsVisible, setCardsVisible] = useState(false)
 
   useEffect(() => {
     const a = loadAgent()
@@ -87,42 +180,48 @@ export default function CaseBoard() {
     }
     setAgent(a)
     generateCases()
+    setTimeout(() => setVisible(true), 100)
   }, [])
 
   async function generateCases() {
     setLoading(true)
     setError(null)
+    setCardsVisible(false)
 
     try {
-      const results = await Promise.all(
-        CASES_POOL.map(async (c) => {
-          const prompt = generateCasePrompt(c.difficulty, c.type)
-          const raw = await callGemini(prompt)
-          // Strip markdown code blocks if present
-          const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-          return JSON.parse(cleaned)
-        })
-      )
-      setCases(results)
-    } catch (err) {
-      setError(err.message)
-    } finally {
+      // Try Gemini API first (1 attempt only)
+      const c = CASES_POOL[0]
+      const prompt = generateCasePrompt(c.difficulty, c.type)
+      const raw = await callGemini(prompt)
+      const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+      const firstCase = JSON.parse(cleaned)
+      setCases([firstCase])
+
+      // Try remaining cases
+      const results = [firstCase]
+      for (let i = 1; i < CASES_POOL.length; i++) {
+        await new Promise((r) => setTimeout(r, 3000))
+        try {
+          const ci = CASES_POOL[i]
+          const pi = generateCasePrompt(ci.difficulty, ci.type)
+          const ri = await callGemini(pi)
+          const cl = ri.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+          results.push(JSON.parse(cl))
+          setCases([...results])
+        } catch {
+          // Skip failed case, continue with others
+        }
+      }
+
       setLoading(false)
+      setTimeout(() => setCardsVisible(true), 100)
+    } catch {
+      // Fallback to static cases
+      setCases(FALLBACK_CASES)
+      setLoading(false)
+      setTimeout(() => setCardsVisible(true), 100)
     }
   }
-
-  // Stagger animation after cases load
-  useEffect(() => {
-    if (cases.length > 0) {
-      gsap.from('.case-card', {
-        opacity: 0,
-        y: 30,
-        duration: 0.4,
-        stagger: 0.1,
-        ease: 'power2.out',
-      })
-    }
-  }, [cases])
 
   function handleOpenCase(caseData) {
     gsap.to(containerRef.current, {
@@ -140,7 +239,15 @@ export default function CaseBoard() {
 
   return (
     <div className="min-h-screen px-4 py-8">
-      <div ref={containerRef} className="max-w-5xl mx-auto">
+      <div
+        ref={containerRef}
+        className="max-w-5xl mx-auto"
+        style={{
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'opacity 0.5s ease-out, transform 0.5s ease-out',
+        }}
+      >
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -197,8 +304,13 @@ export default function CaseBoard() {
               return (
                 <div
                   key={c.case_id}
-                  className="case-card bg-[#0d1117] border border-[#1e2d3d] rounded-lg overflow-hidden hover:border-[#00b4d8]/40 hover:shadow-[0_0_20px_rgba(0,180,216,0.1)] transition-all cursor-pointer group"
+                  className="bg-[#0d1117] border border-[#1e2d3d] rounded-lg overflow-hidden hover:border-[#00b4d8]/40 hover:shadow-[0_0_20px_rgba(0,180,216,0.1)] transition-all cursor-pointer group"
                   onClick={() => handleOpenCase(c)}
+                  style={{
+                    opacity: cardsVisible ? 1 : 0,
+                    transform: cardsVisible ? 'translateY(0)' : 'translateY(30px)',
+                    transition: `opacity 0.4s ease-out ${i * 0.1}s, transform 0.4s ease-out ${i * 0.1}s`,
+                  }}
                 >
                   {/* Threat badge */}
                   <div className="px-5 pt-5 pb-3">

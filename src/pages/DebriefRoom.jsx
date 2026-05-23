@@ -1,12 +1,12 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { gsap } from 'gsap'
 import { saveAgent, getRank, getNextRankXP } from '../utils/gameState'
 
 export default function DebriefRoom() {
   const navigate = useNavigate()
   const { state: locState } = useLocation()
   const containerRef = useRef(null)
+  const [visible, setVisible] = useState(false)
 
   const caseData = locState?.caseData
   const agent = locState?.agent
@@ -31,16 +31,7 @@ export default function DebriefRoom() {
     }
     saveAgent(updatedAgent)
 
-    // Debrief reveal animation
-    const tl = gsap.timeline({ delay: 0.3 })
-    tl.from('.debrief-header', { opacity: 0, y: -30, duration: 0.6, ease: 'power2.out' })
-      .from('.debrief-verdict', { opacity: 0, scale: 0.8, duration: 0.4, ease: 'back.out(1.4)' }, '-=0.2')
-      .from('.debrief-finding', { opacity: 0, x: -20, duration: 0.3, stagger: 0.12, ease: 'power2.out' }, '-=0.1')
-      .from('.debrief-xp', { opacity: 0, y: 20, duration: 0.5, ease: 'power2.out' }, '-=0.1')
-      .from('.debrief-bar', { scaleX: 0, duration: 0.8, ease: 'power2.out', transformOrigin: 'left' }, '-=0.3')
-      .from('.debrief-actions', { opacity: 0, y: 20, duration: 0.4, ease: 'power2.out' }, '-=0.2')
-
-    return () => tl.kill()
+    setTimeout(() => setVisible(true), 100)
   }, [])
 
   if (!caseData || !agent) return null
@@ -63,9 +54,17 @@ export default function DebriefRoom() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      <div ref={containerRef} className="max-w-lg w-full">
+      <div
+        ref={containerRef}
+        className="max-w-lg w-full"
+        style={{
+          opacity: visible ? 1 : 0,
+          transform: visible ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'opacity 0.6s ease-out, transform 0.6s ease-out',
+        }}
+      >
         {/* Header */}
-        <div className="debrief-header text-center mb-6">
+        <div className="text-center mb-6">
           <div className="text-5xl mb-3">{isCorrect ? '✅' : '❌'}</div>
           <h1 className="font-mono text-2xl md:text-3xl font-bold mb-1">
             {isCorrect ? (
@@ -78,7 +77,7 @@ export default function DebriefRoom() {
         </div>
 
         {/* Verdict Card */}
-        <div className="debrief-verdict bg-[#0d1117] border border-[#1e2d3d] rounded-lg p-5 mb-4">
+        <div className="bg-[#0d1117] border border-[#1e2d3d] rounded-lg p-5 mb-4">
           <div className="font-mono text-xs text-[#00b4d8] tracking-widest mb-2">VERDICT</div>
           <div className="font-mono text-lg text-[#e2e8f0] font-semibold mb-2">{debrief.verdict}</div>
           <p className="text-sm text-[#8892a4] leading-relaxed">{debrief.summary}</p>
@@ -102,7 +101,7 @@ export default function DebriefRoom() {
               {debrief.key_findings.map((finding, i) => (
                 <span
                   key={i}
-                  className="debrief-finding font-mono text-[11px] bg-[#00b4d8]/10 border border-[#00b4d8]/20 text-[#00b4d8] px-3 py-1.5 rounded"
+                  className="font-mono text-[11px] bg-[#00b4d8]/10 border border-[#00b4d8]/20 text-[#00b4d8] px-3 py-1.5 rounded"
                 >
                   {finding}
                 </span>
@@ -132,7 +131,7 @@ export default function DebriefRoom() {
         </div>
 
         {/* XP Gained */}
-        <div className="debrief-xp bg-[#0d1117] border border-[#1e2d3d] rounded-lg p-5 mb-4">
+        <div className="bg-[#0d1117] border border-[#1e2d3d] rounded-lg p-5 mb-4">
           <div className="flex items-center justify-between mb-3">
             <div className="font-mono text-xs text-[#00b4d8] tracking-widest">XP GAINED</div>
             <div className="font-mono text-2xl text-[#00ff88] font-bold">+{xpGained}</div>
@@ -143,10 +142,13 @@ export default function DebriefRoom() {
             <span className="font-mono text-xs text-[#8892a4]">{newRank.icon} {newRank.name}</span>
             <span className="font-mono text-[10px] text-[#4a5568]">{currentXP} / {nextXP} XP</span>
           </div>
-          <div className="debrief-bar h-2 bg-[#111820] rounded-full overflow-hidden">
+          <div className="h-2 bg-[#111820] rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#00b4d8] rounded-full transition-all duration-1000"
-              style={{ width: `${progress}%` }}
+              className="h-full bg-[#00b4d8] rounded-full"
+              style={{
+                width: visible ? `${progress}%` : '0%',
+                transition: 'width 1s ease-out 0.5s',
+              }}
             />
           </div>
 
@@ -182,7 +184,7 @@ export default function DebriefRoom() {
         )}
 
         {/* Actions */}
-        <div className="debrief-actions flex gap-3">
+        <div className="flex gap-3">
           <button
             onClick={handleNextCase}
             className="flex-1 font-mono text-sm tracking-widest bg-[#00b4d8] text-[#080b0f] py-3.5 rounded hover:bg-[#00c8f0] active:scale-[0.98] transition-all cursor-pointer font-semibold"
