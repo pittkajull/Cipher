@@ -1,0 +1,70 @@
+export default function ChatEvidence({ evidence, clues, onClueFound, foundClues }) {
+  function handleClick(elementId) {
+    const clue = clues.find((c) => c.element === elementId)
+    if (clue) onClueFound(clue.id)
+  }
+
+  function isClueElement(elementId) {
+    return clues.some((c) => c.element === elementId)
+  }
+
+  function isFound(elementId) {
+    const clue = clues.find((c) => c.element === elementId)
+    return clue && foundClues.includes(clue.id)
+  }
+
+  function getStyle(elementId) {
+    if (!isClueElement(elementId)) return {}
+    if (isFound(elementId)) {
+      return { border: '1px solid #00b4d8', background: 'rgba(0,180,216,0.15)' }
+    }
+    return { cursor: 'pointer', transition: 'all 0.2s' }
+  }
+
+  const messages = evidence.messages || []
+
+  return (
+    <div className="bg-[#0d1117] border border-[#1e2d3d] rounded-lg overflow-hidden">
+      {/* Chat header */}
+      <div className="bg-[#111820] border-b border-[#1e2d3d] px-5 py-3">
+        <div className="font-mono text-[10px] text-[#00b4d8] tracking-widest mb-1">CHAT EVIDENCE</div>
+        <div className="font-mono text-xs text-[#4a5568]">{messages.length} messages recorded</div>
+      </div>
+
+      {/* Messages */}
+      <div className="px-4 py-4 space-y-3 max-h-[400px] overflow-y-auto">
+        {messages.map((msg, i) => {
+          const elementId = `msg_${i}`
+          const isSuspicious = isClueElement(elementId)
+
+          return (
+            <div key={i} className="flex gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#1e2d3d] flex items-center justify-center flex-shrink-0">
+                <span className="text-xs">{msg.sender?.[0]?.toUpperCase() || '?'}</span>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-mono text-xs text-[#e2e8f0] font-semibold">{msg.sender}</span>
+                  <span className="font-mono text-[10px] text-[#4a5568]">{msg.time}</span>
+                </div>
+                <div
+                  className="bg-[#111820] rounded-lg px-3 py-2 text-sm text-[#8892a4] inline-block max-w-full"
+                  style={getStyle(elementId)}
+                  onClick={() => handleClick(elementId)}
+                  data-clue-id={clues.find(c => c.element === elementId)?.id}
+                >
+                  {msg.text}
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Footer */}
+      <div className="border-t border-[#1e2d3d] px-5 py-2 bg-[#111820]/50">
+        <span className="font-mono text-[10px] text-[#4a5568]">Click suspicious messages to investigate</span>
+      </div>
+    </div>
+  )
+}
