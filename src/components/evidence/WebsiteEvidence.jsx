@@ -1,11 +1,11 @@
-export default function WebsiteEvidence({ evidence, clues, onClueFound, foundClues }) {
+export default function WebsiteEvidence({ evidence, clues, onClueFound, onWrongClick, foundClues, wrongFlash }) {
   function handleClick(elementId) {
     const clue = clues.find((c) => c.element === elementId)
-    if (clue) onClueFound(clue.id)
-  }
-
-  function isClueElement(elementId) {
-    return clues.some((c) => c.element === elementId)
+    if (clue) {
+      onClueFound(clue.id)
+    } else {
+      onWrongClick(elementId)
+    }
   }
 
   function isFound(elementId) {
@@ -13,12 +13,18 @@ export default function WebsiteEvidence({ evidence, clues, onClueFound, foundClu
     return clue && foundClues.includes(clue.id)
   }
 
+  function isWrong(elementId) {
+    return wrongFlash === elementId
+  }
+
   function getStyle(elementId) {
-    if (!isClueElement(elementId)) return {}
+    if (isWrong(elementId)) {
+      return { border: '1px solid #ff3d3d', background: 'rgba(255,61,61,0.1)', borderRadius: '4px', padding: '2px 4px', transition: 'all 0.2s' }
+    }
     if (isFound(elementId)) {
       return { border: '1px solid #00b4d8', background: 'rgba(0,180,216,0.05)', borderRadius: '4px', padding: '2px 4px' }
     }
-    return { cursor: 'pointer', transition: 'all 0.2s' }
+    return { cursor: 'pointer', transition: 'all 0.2s', borderRadius: '4px', padding: '2px 4px' }
   }
 
   const isSuspicious = clues.some(c => c.element === 'url')
@@ -37,11 +43,10 @@ export default function WebsiteEvidence({ evidence, clues, onClueFound, foundClu
             className="flex-1 bg-[#080b0f] rounded px-3 py-1 font-mono text-xs"
             style={{
               ...getStyle('url'),
-              color: isSuspicious ? '#ff3d3d' : '#00ff88',
-              border: isFound('url') ? '1px solid #00b4d8' : '1px solid #1e2d3d',
+              color: isWrong('url') ? '#ff3d3d' : isSuspicious ? '#ff3d3d' : '#00ff88',
+              border: isFound('url') ? '1px solid #00b4d8' : isWrong('url') ? '1px solid #ff3d3d' : '1px solid #1e2d3d',
             }}
             onClick={() => handleClick('url')}
-            data-clue-id={clues.find(c => c.element === 'url')?.id}
           >
             {evidence.url}
           </div>
@@ -50,7 +55,14 @@ export default function WebsiteEvidence({ evidence, clues, onClueFound, foundClu
         {evidence.navbar_items && (
           <div className="flex items-center gap-4 px-2">
             {evidence.navbar_items.map((item, i) => (
-              <span key={i} className="font-mono text-[10px] text-[#4a5568]">{item}</span>
+              <span
+                key={i}
+                className="font-mono text-[10px] text-[#4a5568]"
+                style={getStyle(`nav_${i}`)}
+                onClick={() => handleClick(`nav_${i}`)}
+              >
+                {item}
+              </span>
             ))}
           </div>
         )}
@@ -64,7 +76,6 @@ export default function WebsiteEvidence({ evidence, clues, onClueFound, foundClu
             className="text-2xl font-bold mb-2 text-gray-900"
             style={getStyle('hero_title')}
             onClick={() => handleClick('hero_title')}
-            data-clue-id={clues.find(c => c.element === 'hero_title')?.id}
           >
             {evidence.hero_title}
           </h2>
@@ -72,7 +83,6 @@ export default function WebsiteEvidence({ evidence, clues, onClueFound, foundClu
             className="text-sm text-gray-600 leading-relaxed"
             style={getStyle('hero_body')}
             onClick={() => handleClick('hero_body')}
-            data-clue-id={clues.find(c => c.element === 'hero_body')?.id}
           >
             {evidence.hero_body}
           </p>
@@ -84,8 +94,12 @@ export default function WebsiteEvidence({ evidence, clues, onClueFound, foundClu
             {evidence.form_fields.map((field, i) => (
               <div key={i} className="mb-3">
                 <label className="block text-xs text-gray-500 mb-1">{field}</label>
-                <div className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-400">
-                  {field === 'Password' ? '••••••••' : `Enter ${field.toLowerCase()}...`}
+                <div
+                  className="w-full bg-white border border-gray-300 rounded px-3 py-2 text-sm text-gray-400"
+                  style={getStyle(`field_${i}`)}
+                  onClick={() => handleClick(`field_${i}`)}
+                >
+                  {field.toLowerCase().includes('password') ? '••••••••' : `Enter ${field.toLowerCase()}...`}
                 </div>
               </div>
             ))}
@@ -93,7 +107,19 @@ export default function WebsiteEvidence({ evidence, clues, onClueFound, foundClu
               className="w-full bg-[#00b4d8] text-white font-medium text-sm py-2.5 rounded mt-2 cursor-pointer"
               style={getStyle('submit_text')}
               onClick={() => handleClick('submit_text')}
-              data-clue-id={clues.find(c => c.element === 'submit_text')?.id}
+            >
+              {evidence.submit_text}
+            </button>
+          </div>
+        )}
+
+        {/* No form - just a download/CTA button */}
+        {(!evidence.form_fields || evidence.form_fields.length === 0) && (
+          <div className="mt-4">
+            <button
+              className="bg-[#00b4d8] text-white font-medium text-sm px-8 py-3 rounded cursor-pointer"
+              style={getStyle('submit_text')}
+              onClick={() => handleClick('submit_text')}
             >
               {evidence.submit_text}
             </button>
@@ -108,11 +134,12 @@ export default function WebsiteEvidence({ evidence, clues, onClueFound, foundClu
             className="font-mono text-[10px] text-[#4a5568]"
             style={getStyle('footer')}
             onClick={() => handleClick('footer')}
-            data-clue-id={clues.find(c => c.element === 'footer')?.id}
           >
             {evidence.footer}
           </span>
-          <span className="font-mono text-[10px] text-[#4a5568]">Click elements to investigate</span>
+          <span className="font-mono text-[10px] text-[#4a5568]">
+            Klik elemen • Salah = -10 detik
+          </span>
         </div>
       </div>
     </div>

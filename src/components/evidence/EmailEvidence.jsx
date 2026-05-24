@@ -1,7 +1,11 @@
-export default function EmailEvidence({ evidence, clues, onClueFound, foundClues }) {
+export default function EmailEvidence({ evidence, clues, onClueFound, onWrongClick, foundClues, wrongFlash }) {
   function handleClick(elementId) {
     const clue = clues.find((c) => c.element === elementId)
-    if (clue) onClueFound(clue.id)
+    if (clue) {
+      onClueFound(clue.id)
+    } else {
+      onWrongClick(elementId)
+    }
   }
 
   function isClueElement(elementId) {
@@ -13,12 +17,18 @@ export default function EmailEvidence({ evidence, clues, onClueFound, foundClues
     return clue && foundClues.includes(clue.id)
   }
 
+  function isWrong(elementId) {
+    return wrongFlash === elementId
+  }
+
   function getStyle(elementId) {
-    if (!isClueElement(elementId)) return {}
+    if (isWrong(elementId)) {
+      return { border: '1px solid #ff3d3d', background: 'rgba(255,61,61,0.1)', borderRadius: '4px', padding: '2px 4px', transition: 'all 0.2s' }
+    }
     if (isFound(elementId)) {
       return { border: '1px solid #00b4d8', background: 'rgba(0,180,216,0.05)', borderRadius: '4px', padding: '2px 4px' }
     }
-    return { cursor: 'pointer', transition: 'all 0.2s' }
+    return { cursor: 'pointer', transition: 'all 0.2s', borderRadius: '4px', padding: '2px 4px' }
   }
 
   return (
@@ -32,7 +42,6 @@ export default function EmailEvidence({ evidence, clues, onClueFound, foundClues
             className="font-mono text-sm text-[#e2e8f0]"
             style={getStyle('from_name')}
             onClick={() => handleClick('from_name')}
-            data-clue-id={clues.find(c => c.element === 'from_name')?.id}
           >
             {evidence.from_name}
           </span>
@@ -40,7 +49,6 @@ export default function EmailEvidence({ evidence, clues, onClueFound, foundClues
             className="font-mono text-xs text-[#ff3d3d]"
             style={getStyle('from_email')}
             onClick={() => handleClick('from_email')}
-            data-clue-id={clues.find(c => c.element === 'from_email')?.id}
           >
             &lt;{evidence.from_email}&gt;
           </span>
@@ -51,7 +59,6 @@ export default function EmailEvidence({ evidence, clues, onClueFound, foundClues
             className="font-mono text-sm text-[#e2e8f0] font-semibold"
             style={getStyle('subject')}
             onClick={() => handleClick('subject')}
-            data-clue-id={clues.find(c => c.element === 'subject')?.id}
           >
             {evidence.subject}
           </span>
@@ -59,7 +66,13 @@ export default function EmailEvidence({ evidence, clues, onClueFound, foundClues
         {evidence.timestamp && (
           <div className="flex items-center gap-2 mt-1">
             <span className="font-mono text-xs text-[#4a5568] w-12">Date:</span>
-            <span className="font-mono text-[10px] text-[#4a5568]">{evidence.timestamp}</span>
+            <span
+              className="font-mono text-[10px] text-[#4a5568]"
+              style={getStyle('timestamp')}
+              onClick={() => handleClick('timestamp')}
+            >
+              {evidence.timestamp}
+            </span>
           </div>
         )}
       </div>
@@ -70,14 +83,17 @@ export default function EmailEvidence({ evidence, clues, onClueFound, foundClues
           className="text-sm text-[#e2e8f0] leading-relaxed whitespace-pre-wrap"
           style={getStyle('body')}
           onClick={() => handleClick('body')}
-          data-clue-id={clues.find(c => c.element === 'body')?.id}
         >
           {evidence.body}
         </div>
 
         {/* Attachment */}
         {evidence.attachment && (
-          <div className="mt-4 bg-[#111820] border border-[#1e2d3d] rounded-lg p-3 inline-flex items-center gap-3">
+          <div
+            className="mt-4 bg-[#111820] border border-[#1e2d3d] rounded-lg p-3 inline-flex items-center gap-3"
+            style={getStyle('attachment')}
+            onClick={() => handleClick('attachment')}
+          >
             <span className="text-lg">📎</span>
             <div>
               <div className="font-mono text-xs text-[#e2e8f0]">{evidence.attachment}</div>
@@ -93,12 +109,17 @@ export default function EmailEvidence({ evidence, clues, onClueFound, foundClues
               className="inline-block bg-[#00b4d8] text-white font-mono text-sm px-6 py-2.5 rounded cursor-pointer hover:bg-[#00c8f0] transition-colors"
               style={getStyle('cta_url')}
               onClick={() => handleClick('cta_url')}
-              data-clue-id={clues.find(c => c.element === 'cta_url')?.id}
             >
               {evidence.cta_text}
             </div>
             {evidence.cta_url && (
-              <div className="font-mono text-[10px] text-[#4a5568] mt-1">{evidence.cta_url}</div>
+              <div
+                className="font-mono text-[10px] text-[#4a5568] mt-1"
+                style={getStyle('cta_url_display')}
+                onClick={() => handleClick('cta_url_display')}
+              >
+                {evidence.cta_url}
+              </div>
             )}
           </div>
         )}
@@ -106,7 +127,9 @@ export default function EmailEvidence({ evidence, clues, onClueFound, foundClues
 
       {/* Footer hint */}
       <div className="border-t border-[#1e2d3d] px-5 py-2 bg-[#111820]/50">
-        <span className="font-mono text-[10px] text-[#4a5568]">Click suspicious elements to investigate</span>
+        <span className="font-mono text-[10px] text-[#4a5568]">
+          Klik elemen yang mencurigakan • Salah klik = -10 detik
+        </span>
       </div>
     </div>
   )

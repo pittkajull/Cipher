@@ -15,6 +15,7 @@ export default function DebriefRoom() {
   const isCorrect = locState?.isCorrect
   const timeLeft = locState?.timeLeft ?? 0
   const usedARIA = locState?.usedARIA ?? false
+  const wrongCount = locState?.wrongCount ?? 0
   const xpGained = locState?.xpGained ?? 0
 
   useEffect(() => {
@@ -159,7 +160,7 @@ export default function DebriefRoom() {
           )}
 
           {/* Stats row */}
-          <div className="grid grid-cols-3 gap-3 mt-4 pt-3 border-t border-[#1e2d3d]">
+          <div className="grid grid-cols-4 gap-3 mt-4 pt-3 border-t border-[#1e2d3d]">
             <div className="text-center">
               <div className="font-mono text-xs text-[#4a5568]">Time</div>
               <div className="font-mono text-sm text-[#8892a4]">{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</div>
@@ -167,6 +168,10 @@ export default function DebriefRoom() {
             <div className="text-center">
               <div className="font-mono text-xs text-[#4a5568]">Clues</div>
               <div className="font-mono text-sm text-[#8892a4]">{foundClues.length}/{caseData.clues?.length || 0}</div>
+            </div>
+            <div className="text-center">
+              <div className="font-mono text-xs text-[#4a5568]">Wrong</div>
+              <div className={`font-mono text-sm ${wrongCount > 0 ? 'text-[#ff3d3d]' : 'text-[#8892a4]'}`}>{wrongCount}</div>
             </div>
             <div className="text-center">
               <div className="font-mono text-xs text-[#4a5568]">ARIA</div>

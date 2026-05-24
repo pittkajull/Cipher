@@ -1,11 +1,11 @@
-export default function ChatEvidence({ evidence, clues, onClueFound, foundClues }) {
+export default function ChatEvidence({ evidence, clues, onClueFound, onWrongClick, foundClues, wrongFlash }) {
   function handleClick(elementId) {
     const clue = clues.find((c) => c.element === elementId)
-    if (clue) onClueFound(clue.id)
-  }
-
-  function isClueElement(elementId) {
-    return clues.some((c) => c.element === elementId)
+    if (clue) {
+      onClueFound(clue.id)
+    } else {
+      onWrongClick(elementId)
+    }
   }
 
   function isFound(elementId) {
@@ -13,8 +13,14 @@ export default function ChatEvidence({ evidence, clues, onClueFound, foundClues 
     return clue && foundClues.includes(clue.id)
   }
 
+  function isWrong(elementId) {
+    return wrongFlash === elementId
+  }
+
   function getStyle(elementId) {
-    if (!isClueElement(elementId)) return {}
+    if (isWrong(elementId)) {
+      return { border: '1px solid #ff3d3d', background: 'rgba(255,61,61,0.15)' }
+    }
     if (isFound(elementId)) {
       return { border: '1px solid #00b4d8', background: 'rgba(0,180,216,0.15)' }
     }
@@ -35,7 +41,6 @@ export default function ChatEvidence({ evidence, clues, onClueFound, foundClues 
       <div className="px-4 py-4 space-y-3 max-h-[400px] overflow-y-auto">
         {messages.map((msg, i) => {
           const elementId = `msg_${i}`
-          const isSuspicious = isClueElement(elementId)
 
           return (
             <div key={i} className="flex gap-3">
@@ -51,7 +56,6 @@ export default function ChatEvidence({ evidence, clues, onClueFound, foundClues 
                   className="bg-[#111820] rounded-lg px-3 py-2 text-sm text-[#8892a4] inline-block max-w-full"
                   style={getStyle(elementId)}
                   onClick={() => handleClick(elementId)}
-                  data-clue-id={clues.find(c => c.element === elementId)?.id}
                 >
                   {msg.text}
                 </div>
@@ -63,7 +67,9 @@ export default function ChatEvidence({ evidence, clues, onClueFound, foundClues 
 
       {/* Footer */}
       <div className="border-t border-[#1e2d3d] px-5 py-2 bg-[#111820]/50">
-        <span className="font-mono text-[10px] text-[#4a5568]">Click suspicious messages to investigate</span>
+        <span className="font-mono text-[10px] text-[#4a5568]">
+          Klik pesan yang mencurigakan • Salah klik = -10 detik
+        </span>
       </div>
     </div>
   )
