@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { loadAgent, getRank } from '../utils/gameState'
 import { callGemini } from '../hooks/useGemini'
+import { generateRandomCases } from '../utils/caseGenerator'
 
 const THREAT_COLORS = {
   ROUTINE: { bg: 'rgba(0,255,136,0.1)', border: 'rgba(0,255,136,0.3)', text: '#00ff88' },
@@ -12,99 +13,6 @@ const THREAT_COLORS = {
 }
 
 const EVIDENCE_ICONS = { email: '📧', website: '🌐', chat: '💬' }
-
-const FALLBACK_CASES = [
-  {
-    case_id: "CASE-101",
-    codename: "Operation Phantom Mail",
-    threat_level: "ROUTINE",
-    brief: "Karyawan PT Maju melaporkan email mencurigakan dari 'IT Support' yang meminta reset password.",
-    evidence: {
-      type: "email",
-      from_name: "IT Support",
-      from_email: "support@ptmaju-secure.com",
-      subject: "URGENT: Password Reset Required - Action Within 24 Hours",
-      body: "Dear Employee,\n\nOur security system has detected unusual activity on your account. You are required to reset your password immediately to avoid account suspension.\n\nClick the button below to verify your identity and create a new password. This link will expire in 24 hours.\n\nIf you do not reset your password, your account will be locked permanently.\n\nBest regards,\nIT Security Team\nPT Maju Indonesia",
-      cta_text: "Reset Password Now",
-      cta_url: "https://ptmaju-secure.com/verify?id=8a7b3c",
-      timestamp: "2024-01-15 09:32"
-    },
-    clues: [
-      { id: "clue_1", "element": "from_email", description: "Domain bukan domain resmi perusahaan" },
-      { id: "clue_2", "element": "cta_url", description: "URL mengarah ke domain mencurigakan" },
-      { id: "clue_3", "element": "body", description: "Tekanan urgensi dan ancaman akun" }
-    ],
-    answer: "Phishing Attack",
-    choices: ["Phishing Attack", "Malware Distribution", "Social Engineering", "Legitimate Email"],
-    debrief: {
-      verdict: "Phishing Attack Confirmed",
-      summary: "Email ini menggunakan domain palsu yang mirip domain asli perusahaan. URL mengarah ke halaman login palsu untuk mencuri kredensial karyawan.",
-      key_findings: ["Domain spoofing", "Fake urgency pressure", "Credential harvesting URL"],
-      tip: "Selalu verifikasi domain pengirim email. Domain resmi PT Maju adalah ptmaju.co.id, bukan ptmaju-secure.com."
-    },
-    xp_reward: 100
-  },
-  {
-    case_id: "CASE-202",
-    codename: "Operation Ghost Login",
-    threat_level: "ELEVATED",
-    brief: "Ditemukan halaman login bank yang menyalin tampilan situs resmi tetapi dengan URL berbeda.",
-    evidence: {
-      type: "website",
-      url: "https://bank-sentral.co.id/secure-login",
-      title: "Bank Sentral Indonesia - Internet Banking",
-      navbar_items: ["Berlay", "Transfer", "Pembayaran", "Bantuan"],
-      hero_title: "Login ke Internet Banking Anda",
-      hero_body: "Akses rekening Anda dengan aman. Masukkan email dan password untuk melanjutkan.",
-      form_fields: ["Email", "Password"],
-      submit_text: "Masuk Sekarang",
-      footer: "© 2024 Bank Sentral Indonesia. Semua hak dilindungi. | Syarat & Ketentuan | Kebijakan Privasi"
-    },
-    clues: [
-      { id: "clue_1", element: "url", description: "URL bukan domain resmi bank" },
-      { id: "clue_2", element: "footer", description: "Tidak ada link ke OJK atau LPS" },
-      { id: "clue_3", element: "form_fields", description: "Form sederhana tanpa 2FA" }
-    ],
-    answer: "Phishing Attack",
-    choices: ["Phishing Attack", "Malware Distribution", "Social Engineering", "Legitimate Website"],
-    debrief: {
-      verdict: "Fake Banking Website Detected",
-      summary: "Situs ini menyalin tampilan bank resmi tetapi menggunakan domain berbeda. Tujuannya adalah mencuri kredensial login nasabah.",
-      key_findings: ["Typosquatting domain", "No 2FA prompt", "Missing regulatory links"],
-      tip: "Selalu ketik URL bank langsung di browser. Jangan pernah login melalui link dari email atau SMS."
-    },
-    xp_reward: 150
-  },
-  {
-    case_id: "CASE-303",
-    codename: "Operation Sweet Talk",
-    threat_level: "CRITICAL",
-    brief: "Percakapan chat antara 'Manager' dan karyawan baru yang meminta transfer dana darurat.",
-    evidence: {
-      type: "chat",
-      messages: [
-        { sender: "Manager (HR)", text: "Halo, saya Manager HR. Ada urgent task dari direksi.", time: "14:02" },
-        { sender: "Karyawan Baru", text: "Baik Pak, ada yang bisa saya bantu?", time: "14:03" },
-        { sender: "Manager (HR)", text: "Ini rahasia ya. Direksi minta segera transfer 50jt ke rekening vendor baru. Ini nomor rekeningnya: 1234567890 a/n PT Sejahtera.", time: "14:04" },
-        { sender: "Karyawan Baru", text: "Baik Pak, saya proses sekarang.", time: "14:05" }
-      ]
-    },
-    clues: [
-      { id: "clue_1", element: "msg_0", description: "Tidak ada verifikasi identitas" },
-      { id: "clue_2", element: "msg_2", description: "Tekanan urgensi dan kerahasiaan" },
-      { id: "clue_3", element: "msg_2", description: "Permintaan transfer tidak biasa" }
-    ],
-    answer: "Social Engineering",
-    choices: ["Phishing Attack", "Malware Distribution", "Social Engineering", "Legitimate Request"],
-    debrief: {
-      verdict: "Business Email Compromise (BEC)",
-      summary: "Penyamaran sebagai atasan melalui chat untuk memanipulasi karyawan baru melakukan transfer dana ke rekening penipu.",
-      key_findings: ["Authority impersonation", "Urgency and secrecy pressure", "Unusual transfer request"],
-      tip: "Selalu verifikasi permintaan transfer melalui jalur resmi. Telepon langsung ke atasan, jangan percaya chat saja."
-    },
-    xp_reward: 200
-  }
-]
 
 function generateCasePrompt(difficulty, type) {
   return `Generate sebuah kasus investigasi cybersecurity untuk game CIPHER.
@@ -216,8 +124,8 @@ export default function CaseBoard() {
       setLoading(false)
       setTimeout(() => setCardsVisible(true), 100)
     } catch {
-      // Fallback to static cases
-      setCases(FALLBACK_CASES)
+      // Fallback to randomized cases
+      setCases(generateRandomCases())
       setLoading(false)
       setTimeout(() => setCardsVisible(true), 100)
     }
