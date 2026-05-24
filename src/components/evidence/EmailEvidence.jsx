@@ -75,6 +75,17 @@ export default function EmailEvidence({ evidence, clues, onClueFound, foundClues
           {evidence.body}
         </div>
 
+        {/* Attachment */}
+        {evidence.attachment && (
+          <div className="mt-4 bg-[#111820] border border-[#1e2d3d] rounded-lg p-3 inline-flex items-center gap-3">
+            <span className="text-lg">📎</span>
+            <div>
+              <div className="font-mono text-xs text-[#e2e8f0]">{evidence.attachment}</div>
+              <div className="font-mono text-[10px] text-[#4a5568]">Click to download</div>
+            </div>
+          </div>
+        )}
+
         {/* CTA Button */}
         {evidence.cta_text && (
           <div className="mt-4">

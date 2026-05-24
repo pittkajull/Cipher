@@ -4,33 +4,37 @@ const NAMES = [
   'Andi Pratama', 'Sari Dewi', 'Budi Santoso', 'Rina Wati', 'Dedi Kurniawan',
   'Maya Sari', 'Rizky Aditya', 'Putri Lestari', 'Hendra Wijaya', 'Dian Purnama',
   'Agus Setiawan', 'Lina Marlina', 'Fajar Nugroho', 'Wati Susilawati', 'Yoga Prasetyo',
+  'Rudi Hermawan', 'Siti Nurhaliza', 'Eko Prasetyo', 'Dewi Kartika', 'Hadi Sucipto',
 ]
 
 const COMPANIES = [
   'PT Maju Sejahtera', 'PT Nusantara Digital', 'CV Berkah Teknologi', 'PT Sentosa Corp',
   'PT Garuda Indah', 'PT Mitra Solusi', 'PT Cahaya Baru', 'PT Global Prima',
   'PT Samudera Tech', 'PT Bintang Utama', 'PT Nusa Data', 'PT Prima Jaya',
+  'PT Tekno Nusantara', 'CV Digital Solusi', 'PT Aneka Data', 'PT Jaya Mandiri',
 ]
 
 const DOMAINS = [
   'secure-verify.com', 'account-update.net', 'support-help.org', 'login-confirm.com',
   'bank-secure.co', 'verify-now.net', 'help-desk.org', 'update-account.com',
-  'secure-login.co', 'confirm-identity.net',
+  'secure-login.co', 'confirm-identity.net', 'check-security.com', 'safe-access.net',
 ]
 
 const BANK_NAMES = [
   'Bank Sentral Indonesia', 'Bank Nusantara Sejahtera', 'Bank Digital Nusantara',
   'Bank Garuda Indonesia', 'Bank Mitra Rakyat', 'Bank Cahaya Indonesia',
+  'Bank Permata Hijau', 'Bank Samudera Indonesia', 'Bank Pertiwi',
 ]
 
 const BANK_DOMAINS = [
   'bank-sentral.co.id', 'bank-nusantara.co.id', 'bank-digital.co.id',
   'bank-garuda.co.id', 'bank-mitra.co.id', 'bank-cahaya.co.id',
+  'bank-permata.co.id', 'bank-samudera.co.id', 'bank-pertiwi.co.id',
 ]
 
 const CHAT_NAMES = [
   'Manager (HR)', 'Direktur Keuangan', 'Supervisor IT', 'Kepala Divisi',
-  'Admin Sistem', 'Asisten Direktur', 'Koordinator Proyek',
+  'Admin Sistem', 'Asisten Direktur', 'Koordinator Proyek', 'VP Operations',
 ]
 
 const SUBJECTS_EMAIL = [
@@ -40,6 +44,8 @@ const SUBJECTS_EMAIL = [
   'Update Sistem: Konfirmasi Identitas Diperlukan',
   'Peringatan: Login dari Perangkat Baru',
   'Notifikasi: Pembayaran Tertunda',
+  'Invoice #INV-2024 — Mohon Diverifikasi',
+  'Undangan Rapat Mendesak — Klik untuk Detail',
 ]
 
 const WEBSITE_TITLES = [
@@ -98,6 +104,12 @@ const SECURITY_TIPS = [
   'Periksa sertifikat SSL website sebelum memasukkan data sensitif.',
   'Jangan pernah bagikan OTP atau kode verifikasi kepada siapapun.',
   'Laporkan email mencurigakan ke tim IT sebelum mengambil tindakan.',
+  'Jangan buka attachment dari pengirim yang tidak dikenal.',
+  'Selalu scan file dengan antivirus sebelum membuka.',
+  'Jangan download software dari sumber tidak resmi.',
+  'Periksa ekstensi file — .exe, .scr, .bat adalah file berbahaya.',
+  'Bank tidak pernah meminta PIN atau OTP via SMS.',
+  'Jangan klik link pendek dari SMS yang tidak dikenal.',
 ]
 
 function randomFrom(arr) {
@@ -113,11 +125,12 @@ function randomCaseId() {
 }
 
 function randomCodename() {
-  const ops = ['Phantom', 'Shadow', 'Ghost', 'Storm', 'Silent', 'Dark', 'Iron', 'Cyber', 'Eagle', 'Viper', 'Hawk', 'Wolf']
-  const targets = ['Mail', 'Login', 'Link', 'Call', 'Wire', 'Key', 'Gate', 'Net', 'Web', 'Data', 'Code', 'Trap']
+  const ops = ['Phantom', 'Shadow', 'Ghost', 'Storm', 'Silent', 'Dark', 'Iron', 'Cyber', 'Eagle', 'Viper', 'Hawk', 'Wolf', 'Blade', 'Frost', 'Ember', 'Nova']
+  const targets = ['Mail', 'Login', 'Link', 'Call', 'Wire', 'Key', 'Gate', 'Net', 'Web', 'Data', 'Code', 'Trap', 'Bug', 'Worm', 'Vault', 'Shield']
   return `Operation ${randomFrom(ops)} ${randomFrom(targets)}`
 }
 
+// ==================== PHISHING EMAIL ====================
 function generateEmailCase() {
   const name = randomFrom(NAMES)
   const company = randomFrom(COMPANIES)
@@ -165,6 +178,7 @@ function generateEmailCase() {
   }
 }
 
+// ==================== FAKE WEBSITE ====================
 function generateWebsiteCase() {
   const bank = randomFrom(BANK_NAMES)
   const domain = randomFrom(BANK_DOMAINS)
@@ -213,6 +227,7 @@ function generateWebsiteCase() {
   }
 }
 
+// ==================== SOCIAL ENGINEERING CHAT ====================
 function generateChatCase() {
   const scenario = randomFrom(CHAT_SCENARIOS)
   const chatName = randomFrom(CHAT_NAMES)
@@ -250,10 +265,250 @@ function generateChatCase() {
   }
 }
 
-export function generateRandomCases() {
-  return [
-    generateEmailCase(),
-    generateWebsiteCase(),
-    generateChatCase(),
+// ==================== MALWARE EMAIL ====================
+function generateMalwareCase() {
+  const name = randomFrom(NAMES)
+  const company = randomFrom(COMPANIES)
+  const tip = randomFrom(SECURITY_TIPS)
+
+  const malwareScenarios = [
+    {
+      from_name: randomFrom(['HR Department', 'Divisi Keuangan', 'Accounting Team']),
+      subject: randomFrom([
+        'Gaji Bulanan November — Lihat Lampiran',
+        'Laporan Keuangan Q4 — Mohon Review',
+        'Slip Gaji Terlampir — Cek Sekarang',
+        'Invoice Pembayaran Vendor — Action Required',
+      ]),
+      body: (n, c) => `Halo ${n},\n\nTerlampir adalah dokumen yang kamu minta. Silakan buka dan review sebelum akhir hari ini.\n\nFile sudah di-compress untuk mempercepat download. Ekstrak dan buka file .exe di dalamnya.\n\nTerima kasih.\nTim ${c}`,
+      attachment: randomFrom(['Slip_Gaji_Nov2024.zip', 'Laporan_Keuangan_Q4.rar', 'Invoice_Vendor_2024.7z', 'Data_Karyawan_Nov.zip']),
+      cta_text: 'Download Lampiran',
+    },
+    {
+      from_name: randomFrom(['IT Support', 'System Administrator', 'Tim Teknis']),
+      subject: randomFrom([
+        'URGENT: Security Patch — Install Now',
+        'Update Antivirus Wajib — Download di Sini',
+        'System Update Required — Critical',
+        'Windows Security Fix — Immediate Action',
+      ]),
+      body: (n, c) => `Dear ${n},\n\nTerdapat patch keamanan kritis yang harus diinstall segera. Download file updater di bawah ini dan jalankan sebagai Administrator.\n\nGagal menginstall dalam 24 jam akan mengakibatkan akun Anda dikunci dari jaringan ${c}.\n\nIT Security Team`,
+      attachment: randomFrom(['SecurityPatch_2024.exe', 'AntivirusUpdate.scr', 'WindowsFix.bat', 'SystemUpdater.msi']),
+      cta_text: 'Download Patch',
+    },
+    {
+      from_name: randomFrom(['Client Services', 'Partner Management', 'Vendor Relations']),
+      subject: randomFrom([
+        'Kontrak Kerjasama — Review & Sign',
+        'Dokumen Tender — Mohon Dikaji',
+        'Proposal Proyek Terlampir',
+        'Perjanjian Vendor — Tanda Tangan Digital',
+      ]),
+      body: (n, c) => `Kepada ${n},\n\nTerlampir dokumen kerjasama yang sudah disetujui manajemen ${c}. Silakan review dan berikan feedback.\n\nDokumen dalam format compressed. Ekstrak dan buka file presentation di dalamnya.\n\nHormat kami,\nPartner Team`,
+      attachment: randomFrom(['Kontrak_Kerjasama_2024.zip', 'Dokumen_Tender_Final.rar', 'Proposal_Proyek.7z', 'Perjanjian_Vendor.zip']),
+      cta_text: 'Download Dokumen',
+    },
   ]
+
+  const scenario = randomFrom(malwareScenarios)
+
+  return {
+    case_id: randomCaseId(),
+    codename: randomCodename(),
+    threat_level: 'ELEVATED',
+    brief: `${name} menerima email dengan lampiran mencurigakan yang meminta download dan install file.`,
+    evidence: {
+      type: 'email',
+      from_name: scenario.from_name,
+      from_email: `${scenario.from_name.toLowerCase().replace(/\s+/g, '.')}@${company.toLowerCase().replace(/pt\s*/g, '').replace(/cv\s*/g, '').replace(/\s+/g, '-')}.com`,
+      subject: scenario.subject,
+      body: scenario.body(name, company),
+      cta_text: scenario.cta_text,
+      cta_url: `https://files-server.com/download/${Math.random().toString(36).slice(2, 10)}`,
+      timestamp: `2024-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')} ${String(Math.floor(Math.random() * 12) + 8).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
+      attachment: scenario.attachment,
+    },
+    clues: [
+      { id: 'clue_1', element: 'body', description: 'Meminta download dan jalankan file' },
+      { id: 'clue_2', element: 'cta_url', description: 'Link download dari domain asing' },
+      { id: 'clue_3', element: 'subject', description: 'Tekanan urgensi untuk install segera' },
+    ],
+    answer: 'Malware Distribution',
+    choices: ['Phishing Attack', 'Malware Distribution', 'Social Engineering', 'Legitimate Email'],
+    debrief: {
+      verdict: 'Malware Distribution Detected',
+      summary: `Email ini mengandung lampiran berbahaya (${scenario.attachment}) yang akan menginfeksi komputer saat dibuka. File executable tersembunyi di dalam archive.`,
+      key_findings: ['Suspicious attachment format', 'Executable file in archive', 'Urgency to install'],
+      tip: tip,
+    },
+    xp_reward: 150,
+  }
+}
+
+// ==================== SMISHING (SMS PHISHING) ====================
+function generateSmishingCase() {
+  const name = randomFrom(NAMES)
+  const tip = randomFrom(SECURITY_TIPS)
+
+  const smishingScenarios = [
+    {
+      messages: [
+        { sender: 'BANK', text: `[BANK ALERT] Akun Anda akan diblokir. Verifikasi sekarang: https://bit.ly/bank-verify-${Math.random().toString(36).slice(2, 6)}`, time: '08:15' },
+        { sender: name.split(' ')[0], text: 'Pak, ini benar dari bank? Saya dapat SMS ini.', time: '08:16' },
+        { sender: 'Teman', text: 'Jangan diklik! Itu phishing. Bank tidak pernah kirim link via SMS.', time: '08:17' },
+        { sender: name.split(' ')[0], text: 'Tapi nomornya mirip nomor bank resmi...', time: '08:18' },
+      ],
+      brief: `${name} menerima SMS yang mengaku dari bank dan meminta verifikasi melalui link pendek.`,
+      clues: [
+        { id: 'clue_1', element: 'msg_0', description: 'Link pendek (bit.ly) mencurigakan' },
+        { id: 'clue_2', element: 'msg_0', description: 'Ancaman pemblokiran akun' },
+        { id: 'clue_3', element: 'msg_2', description: 'Teman sudah mengingatkan phishing' },
+      ],
+      answer: 'Social Engineering',
+    },
+    {
+      messages: [
+        { sender: '+62812XXXX', text: 'Selamat! Anda menang undian Rp 50 juta. Klaim hadiah di: https://undian-resmi.com/klaim', time: '10:30' },
+        { sender: name.split(' ')[0], text: 'Wah, saya menang! Mau klaim ah.', time: '10:31' },
+        { sender: 'Keluarga', text: 'Hati-hati, itu penipuan. Jangan pernah klaim hadiah dari SMS.', time: '10:32' },
+        { sender: name.split(' ')[0], text: 'Tapi tulisannya resmi banget...', time: '10:33' },
+      ],
+      brief: `${name} menerima SMS pemenang undian yang meminta klaim hadiah melalui link.`,
+      clues: [
+        { id: 'clue_1', element: 'msg_0', description: 'Undian yang tidak pernah diikuti' },
+        { id: 'clue_2', element: 'msg_0', description: 'Link ke domain tidak dikenal' },
+        { id: 'clue_3', element: 'msg_2', description: 'Keluarga mengingatkan penipuan' },
+      ],
+      answer: 'Social Engineering',
+    },
+    {
+      messages: [
+        { sender: 'GOJEK', text: 'Paket Anda gagal dikirim. Update alamat di: https://gojek-delivery.com/update', time: '14:20' },
+        { sender: name.split(' ')[0], text: 'Saya tidak pesan apa-apa... tapi penasaran.', time: '14:21' },
+        { sender: 'Teman', text: 'Itu smishing! Jangan diklik. Cek langsung di aplikasi resmi.', time: '14:22' },
+        { sender: name.split(' ')[0], text: 'Oh iya ya, saya memang tidak pesan.', time: '14:23' },
+      ],
+      brief: `${name} menerima SMS palsu dari 'GOJEK' yang mengaku ada paket gagal dikirim.`,
+      clues: [
+        { id: 'clue_1', element: 'msg_0', description: 'Tidak pernah pesan barang' },
+        { id: 'clue_2', element: 'msg_0', description: 'URL bukan domain resmi Gojek' },
+        { id: 'clue_3', element: 'msg_2', description: 'Teman sarankan cek di aplikasi' },
+      ],
+      answer: 'Social Engineering',
+    },
+  ]
+
+  const scenario = randomFrom(smishingScenarios)
+
+  return {
+    case_id: randomCaseId(),
+    codename: randomCodename(),
+    threat_level: 'CRITICAL',
+    brief: scenario.brief,
+    evidence: {
+      type: 'chat',
+      messages: scenario.messages,
+    },
+    clues: scenario.clues,
+    answer: scenario.answer,
+    choices: ['Phishing Attack', 'Malware Distribution', 'Social Engineering', 'Legitimate SMS'],
+    debrief: {
+      verdict: 'SMS Phishing (Smishing) Detected',
+      summary: 'SMS ini menggunakan link pendek dan ancaman untuk menipu korban. Pengirim palsu menggunakan nama layanan populer untuk menambah legitimasi.',
+      key_findings: ['Shortened URL', 'Threat/urgency tactics', 'Impersonation of known brand'],
+      tip: tip,
+    },
+    xp_reward: 200,
+  }
+}
+
+// ==================== RANSOMWARE WEBSITE ====================
+function generateRansomwareCase() {
+  const tip = randomFrom(SECURITY_TIPS)
+
+  const ransomwareScenarios = [
+    {
+      url: 'https://free-antivirus-download.com/premium',
+      title: 'AntiVirus Premium — Download Gratis',
+      navbar_items: ['Home', 'Download', 'Reviews', 'Contact'],
+      hero_title: 'AntiVirus Premium 2024 — GRATIS!',
+      hero_body: 'Download antivirus terbaik 2024. Lindungi PC Anda dari malware, ransomware, dan virus. Proses download otomatis setelah klik tombol.',
+      form_fields: [],
+      submit_text: 'Download Sekarang (2.5 MB)',
+      footer: '© 2024 AntiVirus Solutions. All rights reserved.',
+      brief: 'Ditemukan website yang menawarkan download antivirus gratis, tetapi sebenarnya mengandung ransomware.',
+    },
+    {
+      url: 'https://crack-software.net/photoshop-2024',
+      title: 'Adobe Photoshop 2024 — Full Version Free',
+      navbar_items: ['Home', 'Software', 'Tutorials', 'FAQ'],
+      hero_title: 'Photoshop 2024 Full Version — TANPA BAYAR!',
+      hero_body: 'Download Adobe Photoshop 2024 full version dengan crack. Tidak perlu langganan. Install dan langsung pakai.',
+      form_fields: [],
+      submit_text: 'Download + Crack',
+      footer: '© 2024 Crack Software Hub. All rights reserved.',
+      brief: 'Website menawarkan software bajakan yang sudah dimodifikasi dengan ransomware.',
+    },
+    {
+      url: 'https://windows-optimizer-pro.com/download',
+      title: 'Windows Optimizer Pro — Speed Up Your PC',
+      navbar_items: ['Home', 'Features', 'Download', 'Support'],
+      hero_title: 'PC Lambat? Optimizer Pro Solusinya!',
+      hero_body: 'Percepat PC Anda hingga 300%. Bersihkan registry, hapus junk file, dan optimalkan performa. Download gratis sekarang.',
+      form_fields: [],
+      submit_text: 'Download Optimizer',
+      footer: '© 2024 Optimizer Pro. All rights reserved.',
+      brief: 'Website optimizer palsu yang mendistribusikan ransomware melalui download.',
+    },
+  ]
+
+  const scenario = randomFrom(ransomwareScenarios)
+
+  return {
+    case_id: randomCaseId(),
+    codename: randomCodename(),
+    threat_level: 'CLASSIFIED',
+    brief: scenario.brief,
+    evidence: {
+      type: 'website',
+      url: scenario.url,
+      title: scenario.title,
+      navbar_items: scenario.navbar_items,
+      hero_title: scenario.hero_title,
+      hero_body: scenario.hero_body,
+      form_fields: scenario.form_fields,
+      submit_text: scenario.submit_text,
+      footer: scenario.footer,
+    },
+    clues: [
+      { id: 'clue_1', element: 'url', description: 'Domain bukan situs resmi software' },
+      { id: 'clue_2', element: 'hero_body', description: 'Download otomatis tanpa verifikasi' },
+      { id: 'clue_3', element: 'submit_text', description: 'File size tidak wajar untuk software' },
+    ],
+    answer: 'Malware Distribution',
+    choices: ['Phishing Attack', 'Malware Distribution', 'Social Engineering', 'Legitimate Website'],
+    debrief: {
+      verdict: 'Ransomware Distribution Site',
+      summary: 'Website ini mendistribusikan ransomware melalui download software gratis/crack. File yang diunduh akan mengenkripsi semua data di komputer korban.',
+      key_findings: ['Fake software site', 'Auto-download behavior', 'Too good to be true offer'],
+      tip: tip,
+    },
+    xp_reward: 300,
+  }
+}
+
+// ==================== MAIN EXPORT ====================
+export function generateRandomCases() {
+  const allGenerators = [
+    generateEmailCase,
+    generateWebsiteCase,
+    generateChatCase,
+    generateMalwareCase,
+    generateSmishingCase,
+    generateRansomwareCase,
+  ]
+
+  // Shuffle and pick 5 random cases
+  const shuffled = allGenerators.sort(() => Math.random() - 0.5)
+  return shuffled.slice(0, 5).map((gen) => gen())
 }
