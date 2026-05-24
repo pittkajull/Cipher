@@ -497,6 +497,402 @@ function generateRansomwareCase() {
   }
 }
 
+// ==================== VISHING (VOICE PHISHING) ====================
+function generateVishingCase() {
+  const name = randomFrom(NAMES)
+  const tip = randomFrom(SECURITY_TIPS)
+
+  const vishingScenarios = [
+    {
+      messages: [
+        { sender: 'Bank CS', text: 'Selamat pagi, saya dari Bank Sentral Indonesia. Ada aktivitas mencurigakan di rekening Bapak.', time: '09:15' },
+        { sender: name.split(' ')[0], text: 'Aktivitas apa? Saya tidak merasa transaksi apapun.', time: '09:16' },
+        { sender: 'Bank CS', text: 'Ada transfer keluar Rp 15 juta ke rekening tidak dikenal. Kami perlu verifikasi sekarang. Mohon sebutkan nomor rekening dan nama ibu kandung Anda.', time: '09:17' },
+        { sender: name.split(' ')[0], text: 'Baik, nomor rekening saya 1234567890, ibu saya bernama...', time: '09:18' },
+      ],
+      brief: `${name} menerima telepon dari seseorang yang mengaku CS bank dan meminta data pribadi.`,
+      clues: [
+        { id: 'clue_1', element: 'msg_2', description: 'Meminta data pribadi via telepon' },
+        { id: 'clue_2', element: 'msg_2', description: 'Menciptakan situasi panik' },
+        { id: 'clue_3', element: 'msg_3', description: 'Korban langsung memberikan data' },
+      ],
+    },
+    {
+      messages: [
+        { sender: 'Telkom', text: 'Selamat siang, dari Telkom Indonesia. Internet Bapak akan diputus karena ada tunggakan.', time: '13:30' },
+        { sender: name.split(' ')[0], text: 'Tunggakan? Saya bayar tiap bulan kok.', time: '13:31' },
+        { sender: 'Telkom', text: 'Sistem kami menunjukkan ada tunggakan 3 bulan. Untuk menghindari pemutusan, silakan bayar via transfer ke rekening berikut: 9876543210 a/n PT Telkom.', time: '13:32' },
+        { sender: name.split(' ')[0], text: 'Oke, saya transfer sekarang.', time: '13:33' },
+      ],
+      brief: `${name} menerima telepon dari 'Telkom' yang mengaku ada tunggakan dan meminta transfer.`,
+      clues: [
+        { id: 'clue_1', element: 'msg_2', description: 'Meminta transfer ke rekening pribadi' },
+        { id: 'clue_2', element: 'msg_0', description: 'Tidak ada verifikasi identitas' },
+        { id: 'clue_3', element: 'msg_2', description: 'Ancaman pemutusan layanan' },
+      ],
+    },
+    {
+      messages: [
+        { sender: 'Polisi', text: 'Selamat pagi, saya dari Polda Metro Jaya. Ada surat tilang elektronik yang belum dibayar.', time: '10:00' },
+        { sender: name.split(' ')[0], text: 'Tilang? Saya tidak merasa melanggar.', time: '10:01' },
+        { sender: 'Polisi', text: 'Ada bukti CCTV. Jika tidak dibayar hari ini, akan ada denda Rp 5 juta. Bayar ke rekening pengadilan: 1122334455 a/n PN Jakarta.', time: '10:02' },
+        { sender: name.split(' ')[0], text: 'Baik Pak, saya bayar sekarang.', time: '10:03' },
+      ],
+      brief: `${name} menerima telepon dari 'polisi' yang mengaku ada tilang dan meminta pembayaran segera.`,
+      clues: [
+        { id: 'clue_1', element: 'msg_2', description: 'Meminta bayar ke rekening pribadi' },
+        { id: 'clue_2', element: 'msg_2', description: 'Ancaman denda yang tidak wajar' },
+        { id: 'clue_3', element: 'msg_0', description: 'Polisi tidak pernah telepon minta bayar' },
+      ],
+    },
+  ]
+
+  const scenario = randomFrom(vishingScenarios)
+
+  return {
+    case_id: randomCaseId(),
+    codename: randomCodename(),
+    threat_level: 'CRITICAL',
+    brief: scenario.brief,
+    evidence: {
+      type: 'chat',
+      messages: scenario.messages,
+    },
+    clues: scenario.clues,
+    answer: 'Social Engineering',
+    choices: ['Phishing Attack', 'Malware Distribution', 'Social Engineering', 'Legitimate Call'],
+    debrief: {
+      verdict: 'Vishing (Voice Phishing) Detected',
+      summary: 'Penipu menelepon korban sambil menyamar sebagai instansi resmi. Mereka menciptakan urgensi dan meminta data pribadi atau transfer uang.',
+      key_findings: ['Impersonation of authority', 'Urgency and threats', 'Request for personal data'],
+      tip: tip,
+    },
+    xp_reward: 200,
+  }
+}
+
+// ==================== CREDENTIAL STUFFING ====================
+function generateCredentialCase() {
+  const tip = randomFrom(SECURITY_TIPS)
+
+  const sites = [
+    {
+      url: 'https://tokopedia-login.com/signin',
+      title: 'Tokopedia — Login',
+      navbar_items: ['Home', 'Promo', 'Kategori', 'Bantuan'],
+      hero_title: 'Masuk ke Tokopedia',
+      hero_body: 'Gunakan akun Anda untuk melanjutkan belanja.',
+      submit_text: 'Masuk',
+      footer: '© 2024 Tokopedia. All rights reserved.',
+    },
+    {
+      url: 'https://shopee-id.com/login',
+      title: 'Shopee Indonesia — Login',
+      navbar_items: ['Home', 'Flash Sale', 'Mall', 'Bantuan'],
+      hero_title: 'Login Shopee',
+      hero_body: 'Masuk untuk menikmati promo dan diskon spesial.',
+      submit_text: 'Log In',
+      footer: '© 2024 Shopee. All rights reserved.',
+    },
+    {
+      url: 'https://instagram-secure.com/accounts/login',
+      title: 'Instagram — Login',
+      navbar_items: ['Home', 'Explore', 'Reels', 'Help'],
+      hero_title: 'Instagram',
+      hero_body: 'Masuk untuk melihat foto dan video dari teman Anda.',
+      submit_text: 'Log In',
+      footer: '© 2024 Instagram from Meta.',
+    },
+  ]
+
+  const site = randomFrom(sites)
+
+  return {
+    case_id: randomCaseId(),
+    codename: randomCodename(),
+    threat_level: 'ELEVATED',
+    brief: `Ditemukan halaman login palsu yang meniru ${site.title.split('—')[0].trim()} untuk mencuri kredensial.`,
+    evidence: {
+      type: 'website',
+      url: site.url,
+      title: site.title,
+      navbar_items: site.navbar_items,
+      hero_title: site.hero_title,
+      hero_body: site.hero_body,
+      form_fields: ['Email/Username', 'Password'],
+      submit_text: site.submit_text,
+      footer: site.footer,
+    },
+    clues: [
+      { id: 'clue_1', element: 'url', description: 'URL bukan domain resmi situs' },
+      { id: 'clue_2', element: 'footer', description: 'Footer tidak lengkap atau palsu' },
+      { id: 'clue_3', element: 'form_fields', description: 'Tidak ada opsi login sosial media' },
+    ],
+    answer: 'Phishing Attack',
+    choices: ['Phishing Attack', 'Malware Distribution', 'Social Engineering', 'Legitimate Website'],
+    debrief: {
+      verdict: 'Credential Stuffing Site',
+      summary: 'Situs ini meniru platform populer untuk mencuri username dan password. Kredensial yang dicoba akan digunakan untuk login massal ke akun lain.',
+      key_findings: ['Typosquatting domain', 'Missing security features', 'Credential harvesting'],
+      tip: tip,
+    },
+    xp_reward: 150,
+  }
+}
+
+// ==================== CRYPTOJACKING ====================
+function generateCryptojackingCase() {
+  const tip = randomFrom(SECURITY_TIPS)
+
+  const sites = [
+    {
+      url: 'https://free-movie-streaming.net/watch',
+      title: 'Nonton Film Gratis — Streaming HD',
+      navbar_items: ['Home', 'Genre', 'Popular', 'Search'],
+      hero_title: 'Nonton Film Gratis Tanpa Iklan!',
+      hero_body: 'Ribuan film dan series bisa ditonton gratis. Tidak perlu registrasi. Streaming langsung di browser Anda.',
+      submit_text: 'Play Now',
+      footer: '© 2024 Free Movie Hub. All rights reserved.',
+    },
+    {
+      url: 'https://online-converter-free.com',
+      title: 'Free Online Converter — PDF, MP4, MP3',
+      navbar_items: ['Home', 'Tools', 'FAQ', 'Contact'],
+      hero_title: 'Konversi File Apapun Secara Gratis!',
+      hero_body: 'Convert PDF, video, audio, dan gambar tanpa batas. Proses cepat langsung di browser.',
+      submit_text: 'Convert Now',
+      footer: '© 2024 Converter Tools. All rights reserved.',
+    },
+    {
+      url: 'https://free-games-online.com/play',
+      title: 'Free Online Games — Play Now',
+      navbar_items: ['Home', 'Categories', 'Top Games', 'New'],
+      hero_title: 'Mainkan Game Online Gratis!',
+      hero_body: 'Ratusan game browser gratis. Tidak perlu download. Mainkan sekarang tanpa registrasi.',
+      submit_text: 'Play Game',
+      footer: '© 2024 Free Games Hub. All rights reserved.',
+    },
+  ]
+
+  const site = randomFrom(sites)
+
+  return {
+    case_id: randomCaseId(),
+    codename: randomCodename(),
+    threat_level: 'ELEVATED',
+    brief: 'Website streaming gratis terdeteksi menggunakan script mining cryptocurrency di background.',
+    evidence: {
+      type: 'website',
+      url: site.url,
+      title: site.title,
+      navbar_items: site.navbar_items,
+      hero_title: site.hero_title,
+      hero_body: site.hero_body,
+      form_fields: [],
+      submit_text: site.submit_text,
+      footer: site.footer,
+    },
+    clues: [
+      { id: 'clue_1', element: 'url', description: 'Domain menggunakan kata "free" mencurigakan' },
+      { id: 'clue_2', element: 'hero_body', description: 'Tidak perlu registrasi terlalu mudah' },
+      { id: 'clue_3', element: 'submit_text', description: 'CPU usage tinggi saat halaman dibuka' },
+    ],
+    answer: 'Malware Distribution',
+    choices: ['Phishing Attack', 'Malware Distribution', 'Social Engineering', 'Legitimate Website'],
+    debrief: {
+      verdict: 'Cryptojacking Script Detected',
+      summary: 'Website ini menyembunyikan script mining cryptocurrency yang menggunakan CPU pengunjung untuk menambang crypto tanpa izin.',
+      key_findings: ['Hidden mining script', 'High CPU usage', 'Too good to be true offer'],
+      tip: tip,
+    },
+    xp_reward: 150,
+  }
+}
+
+// ==================== QR CODE PHISHING (QUISHING) ====================
+function generateQuishingCase() {
+  const name = randomFrom(NAMES)
+  const company = randomFrom(COMPANIES)
+  const tip = randomFrom(SECURITY_TIPS)
+
+  const quishingScenarios = [
+    {
+      from_name: 'HR Department',
+      from_email: `hr@${company.toLowerCase().replace(/\s+/g, '-').replace(/pt\s*/g, '')}.com`,
+      subject: 'Registrasi Ulang Karyawan — Scan QR Code',
+      body: (n, c) => `Halo ${n},\n\nSebagai bagian dari pembaruan data karyawan ${c}, silakan scan QR code di bawah ini untuk mengisi formulir registrasi ulang.\n\nPastikan Anda menggunakan ponsel pribadi untuk scan. Formulir harus diisi sebelum akhir bulan.\n\nTerima kasih.\nHR ${c}`,
+      cta_text: 'Scan QR Code',
+    },
+    {
+      from_name: 'Event Committee',
+      from_email: `event@${company.toLowerCase().replace(/\s+/g, '-').replace(/pt\s*/g, '')}.com`,
+      subject: 'Undangan Event — Scan untuk RSVP',
+      body: (n, c) => `Dear ${n},\n\nAnda diundang ke acara tahunan ${c}. Silakan scan QR code berikut untuk konfirmasi kehadiran dan mendapatkan e-ticket.\n\nEvent akan diadakan di Hotel Mulia, Jakarta. Dress code: formal.\n\nCommittee`,
+      cta_text: 'Scan untuk RSVP',
+    },
+    {
+      from_name: 'IT Support',
+      from_email: `it@${company.toLowerCase().replace(/\s+/g, '-').replace(/pt\s*/g, '')}.com`,
+      subject: 'Setup 2FA — Scan QR Code Ini',
+      body: (n, c) => `Halo ${n},\n\nUntuk meningkatkan keamanan akun ${c} Anda, silakan scan QR code di bawah ini untuk mengaktifkan Two-Factor Authentication.\n\nProses ini wajib untuk semua karyawan. Deadline: 3 hari.\n\nIT Security`,
+      cta_text: 'Scan QR Code',
+    },
+  ]
+
+  const scenario = randomFrom(quishingScenarios)
+
+  return {
+    case_id: randomCaseId(),
+    codename: randomCodename(),
+    threat_level: 'CLASSIFIED',
+    brief: `${name} menerima email dengan QR code yang mengarah ke halaman phishing.`,
+    evidence: {
+      type: 'email',
+      from_name: scenario.from_name,
+      from_email: scenario.from_email,
+      subject: scenario.subject,
+      body: scenario.body(name, company),
+      cta_text: scenario.cta_text,
+      cta_url: `https://qr-verify.com/scan/${Math.random().toString(36).slice(2, 8)}`,
+      timestamp: `2024-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')} ${String(Math.floor(Math.random() * 12) + 8).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
+    },
+    clues: [
+      { id: 'clue_1', element: 'cta_url', description: 'Link QR mengarah ke domain asing' },
+      { id: 'clue_2', element: 'body', description: 'Tekanan deadline untuk scan segera' },
+      { id: 'clue_3', element: 'from_email', description: 'Domain pengirim tidak konsisten' },
+    ],
+    answer: 'Phishing Attack',
+    choices: ['Phishing Attack', 'Malware Distribution', 'Social Engineering', 'Legitimate Email'],
+    debrief: {
+      verdict: 'QR Code Phishing (Quishing) Detected',
+      summary: 'Email ini menggunakan QR code untuk mengarahkan korban ke halaman phishing. QR code sulit diverifikasi karena tidak terlihat URL-nya sebelum di-scan.',
+      key_findings: ['QR code to phishing URL', 'Deadline pressure', 'Impersonation of internal dept'],
+      tip: tip,
+    },
+    xp_reward: 200,
+  }
+}
+
+// ==================== INVOICE FRAUD ====================
+function generateInvoiceCase() {
+  const name = randomFrom(NAMES)
+  const company = randomFrom(COMPANIES)
+  const tip = randomFrom(SECURITY_TIPS)
+
+  const invoiceScenarios = [
+    {
+      from_name: 'Accounting Vendor',
+      from_email: `invoice@${randomFrom(DOMAINS)}`,
+      subject: `Invoice #INV-${Math.floor(Math.random() * 9000 + 1000)} — Pembayaran Jatuh Tempo`,
+      body: (n, c) => `Kepada ${n},\n\nTerlampir adalah invoice untuk layanan konsultasi Q4 2024 sebesar Rp 45.000.000.\n\nPembayaran jatuh tempo: 3 hari dari tanggal email ini.\n\nMohon transfer ke rekening berikut:\nBank BCA: ${randomAccount()}\na/n PT Jasa Konsultasi\n\nTerima kasih.\nFinance Team`,
+      cta_text: 'Download Invoice',
+    },
+    {
+      from_name: 'Cloud Provider',
+      from_email: `billing@${randomFrom(DOMAINS)}`,
+      subject: 'Invoice Overdue — Akun Akan Ditangguhkan',
+      body: (n, c) => `Dear ${n},\n\nTagihan cloud service ${c} sebesar Rp 28.500.000 sudah melewati jatuh tempo.\n\nJika tidak dibayar dalam 48 jam, akses layanan akan ditangguhkan dan data akan dihapus permanen.\n\nBayar sekarang: transfer ke rekening ${randomAccount()} a/n Cloud Services.\n\nBilling Team`,
+      cta_text: 'Bayar Sekarang',
+    },
+    {
+      from_name: 'Maintenance Vendor',
+      from_email: `service@${randomFrom(DOMAINS)}`,
+      subject: 'Invoice Perawatan AC — Pembayaran Segera',
+      body: (n, c) => `Halo ${n},\n\nInvoice perawatan AC gedung ${c} bulan November sebesar Rp 12.000.000.\n\nSilakan transfer ke:\nBank Mandiri: ${randomAccount()}\na/n CV Teknik Sejuk\n\nTerima kasih.\nAdmin`,
+      cta_text: 'Lihat Invoice',
+    },
+  ]
+
+  const scenario = randomFrom(invoiceScenarios)
+
+  return {
+    case_id: randomCaseId(),
+    codename: randomCodename(),
+    threat_level: 'ELEVATED',
+    brief: `${name} menerima email invoice palsu yang meminta pembayaran ke rekening tidak dikenal.`,
+    evidence: {
+      type: 'email',
+      from_name: scenario.from_name,
+      from_email: scenario.from_email,
+      subject: scenario.subject,
+      body: scenario.body(name, company),
+      cta_text: scenario.cta_text,
+      cta_url: `https://invoice-view.com/doc/${Math.random().toString(36).slice(2, 8)}`,
+      timestamp: `2024-${String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')}-${String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')} ${String(Math.floor(Math.random() * 12) + 8).padStart(2, '0')}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`,
+    },
+    clues: [
+      { id: 'clue_1', element: 'from_email', description: 'Email vendor tidak dikenal' },
+      { id: 'clue_2', element: 'body', description: 'Meminta transfer ke rekening baru' },
+      { id: 'clue_3', element: 'body', description: 'Tekanan waktu dan ancaman penangguhan' },
+    ],
+    answer: 'Social Engineering',
+    choices: ['Phishing Attack', 'Malware Distribution', 'Social Engineering', 'Legitimate Invoice'],
+    debrief: {
+      verdict: 'Invoice Fraud Detected',
+      summary: 'Email ini mengirim invoice palsu dan meminta pembayaran ke rekening penipu. Mereka menyamar sebagai vendor atau layanan yang biasa digunakan perusahaan.',
+      key_findings: ['Unknown vendor email', 'New bank account', 'Urgency to pay'],
+      tip: tip,
+    },
+    xp_reward: 150,
+  }
+}
+
+// ==================== CEO FRAUD ====================
+function generateCEOFraudCase() {
+  const name = randomFrom(NAMES)
+  const company = randomFrom(COMPANIES)
+  const tip = randomFrom(SECURITY_TIPS)
+  const ceoName = randomFrom(NAMES)
+
+  const ceoScenarios = [
+    {
+      messages: [
+        { sender: `${ceoName} (CEO)`, text: `${name.split(' ')[0]}, saya sedang meeting dengan investor. Butuh bantuanmu sekarang.`, time: '11:00' },
+        { sender: name.split(' ')[0], text: 'Siap Pak, ada yang bisa saya bantu?', time: '11:01' },
+        { sender: `${ceoName} (CEO)`, text: 'Saya butuh kamu transfer 100jt ke rekening investor baru. Ini rahasia, jangan kasih tahu siapapun. Nanti saya ganti. Rekening: ${randomAccount()} a/n PT Investasi.', time: '11:02' },
+        { sender: name.split(' ')[0], text: 'Baik Pak, saya proses sekarang.', time: '11:03' },
+      ],
+      brief: `Seseorang menyamar sebagai CEO ${company} dan meminta ${name} transfer dana besar.`,
+    },
+    {
+      messages: [
+        { sender: `${ceoName} (Direktur)`, text: 'Tolong bantu saya, ada pembayaran mendesak yang harus diselesaikan hari ini.', time: '14:00' },
+        { sender: name.split(' ')[0], text: 'Pembayaran apa Pak?', time: '14:01' },
+        { sender: `${ceoName} (Direktur)`, text: 'Akuisisi perusahaan baru. Transfer 200jt ke ${randomAccount()} a/n PT Akusisi. Jangan sampai bocor ke siapapun, ini confidential.', time: '14:02' },
+        { sender: name.split(' ')[0], text: 'Baik Pak, saya urus sekarang.', time: '14:03' },
+      ],
+      brief: `Penipu menyamar sebagai direktur dan meminta transfer rahasia untuk 'akuisisi perusahaan'.`,
+    },
+  ]
+
+  const scenario = randomFrom(ceoScenarios)
+
+  return {
+    case_id: randomCaseId(),
+    codename: randomCodename(),
+    threat_level: 'CLASSIFIED',
+    brief: scenario.brief,
+    evidence: {
+      type: 'chat',
+      messages: scenario.messages,
+    },
+    clues: [
+      { id: 'clue_1', element: 'msg_2', description: 'Permintaan transfer sangat besar' },
+      { id: 'clue_2', element: 'msg_2', description: 'Tekanan kerahasiaan tinggi' },
+      { id: 'clue_3', element: 'msg_0', description: 'Tidak ada verifikasi identitas CEO' },
+    ],
+    answer: 'Social Engineering',
+    choices: ['Phishing Attack', 'Malware Distribution', 'Social Engineering', 'Legitimate Request'],
+    debrief: {
+      verdict: 'CEO Fraud / Business Email Compromise',
+      summary: 'Penipu menyamar sebagai CEO atau direktur untuk memanipulasi karyawan melakukan transfer besar. Mereka memanfaatkan hierarki perusahaan dan tekanan kerahasiaan.',
+      key_findings: ['Authority impersonation', 'Large transfer request', 'Secrecy pressure'],
+      tip: tip,
+    },
+    xp_reward: 300,
+  }
+}
+
 // ==================== MAIN EXPORT ====================
 export function generateRandomCases() {
   const allGenerators = [
@@ -506,6 +902,12 @@ export function generateRandomCases() {
     generateMalwareCase,
     generateSmishingCase,
     generateRansomwareCase,
+    generateVishingCase,
+    generateCredentialCase,
+    generateCryptojackingCase,
+    generateQuishingCase,
+    generateInvoiceCase,
+    generateCEOFraudCase,
   ]
 
   // Shuffle and pick 5 random cases
