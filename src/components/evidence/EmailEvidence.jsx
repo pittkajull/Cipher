@@ -8,10 +8,6 @@ export default function EmailEvidence({ evidence, clues, onClueFound, onWrongCli
     }
   }
 
-  function isClueElement(elementId) {
-    return clues.some((c) => c.element === elementId)
-  }
-
   function isFound(elementId) {
     const clue = clues.find((c) => c.element === elementId)
     return clue && foundClues.includes(clue.id)
@@ -23,19 +19,28 @@ export default function EmailEvidence({ evidence, clues, onClueFound, onWrongCli
 
   function getStyle(elementId) {
     if (isWrong(elementId)) {
-      return { border: '1px solid #ff3d3d', background: 'rgba(255,61,61,0.1)', borderRadius: '4px', padding: '2px 4px', transition: 'all 0.2s' }
+      return { border: '1px solid #ff3d3d', background: 'rgba(255,61,61,0.1)', borderRadius: '4px', padding: '2px 4px' }
     }
     if (isFound(elementId)) {
       return { border: '1px solid #00b4d8', background: 'rgba(0,180,216,0.05)', borderRadius: '4px', padding: '2px 4px' }
     }
-    return { cursor: 'pointer', transition: 'all 0.2s', borderRadius: '4px', padding: '2px 4px' }
+    return {
+      cursor: 'pointer',
+      borderRadius: '4px',
+      padding: '2px 4px',
+      borderBottom: '1px dashed rgba(0,180,216,0.3)',
+      transition: 'all 0.2s',
+    }
   }
 
   return (
     <div className="bg-[#0d1117] border border-[#1e2d3d] rounded-lg overflow-hidden">
-      {/* Email header bar */}
+      {/* Header + Hint */}
       <div className="bg-[#111820] border-b border-[#1e2d3d] px-5 py-3">
-        <div className="font-mono text-[10px] text-[#00b4d8] tracking-widest mb-2">EMAIL EVIDENCE</div>
+        <div className="flex items-center justify-between mb-2">
+          <span className="font-mono text-[10px] text-[#00b4d8] tracking-widest">EMAIL EVIDENCE</span>
+          <span className="font-mono text-[10px] text-[#f4a522] animate-pulse">🔍 Klik elemen yang mencurigakan</span>
+        </div>
         <div className="flex items-center gap-2 mb-1">
           <span className="font-mono text-xs text-[#4a5568] w-12">From:</span>
           <span
@@ -125,10 +130,10 @@ export default function EmailEvidence({ evidence, clues, onClueFound, onWrongCli
         )}
       </div>
 
-      {/* Footer hint */}
+      {/* Footer */}
       <div className="border-t border-[#1e2d3d] px-5 py-2 bg-[#111820]/50">
         <span className="font-mono text-[10px] text-[#4a5568]">
-          Klik elemen yang mencurigakan • Salah klik = -10 detik
+          Garis putus-putus = bisa diklik • Salah = -10 detik
         </span>
       </div>
     </div>

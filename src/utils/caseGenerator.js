@@ -251,7 +251,7 @@ function generateChatCase() {
     clues: [
       { id: 'clue_1', element: 'msg_0', description: 'Tidak ada verifikasi identitas' },
       { id: 'clue_2', element: 'msg_2', description: 'Tekanan urgensi dan kerahasiaan' },
-      { id: 'clue_3', element: 'msg_2', description: 'Permintaan transfer tidak biasa' },
+      { id: 'clue_3', element: 'msg_3', description: 'Karyawan langsung menurut tanpa konfirmasi' },
     ],
     answer: 'Social Engineering',
     choices: ['Phishing Attack', 'Malware Distribution', 'Social Engineering', 'Legitimate Request'],
@@ -361,7 +361,7 @@ function generateSmishingCase() {
       brief: `${name} menerima SMS yang mengaku dari bank dan meminta verifikasi melalui link pendek.`,
       clues: [
         { id: 'clue_1', element: 'msg_0', description: 'Link pendek (bit.ly) mencurigakan' },
-        { id: 'clue_2', element: 'msg_0', description: 'Ancaman pemblokiran akun' },
+        { id: 'clue_2', element: 'msg_1', description: 'Korban langsung percaya tanpa verifikasi' },
         { id: 'clue_3', element: 'msg_2', description: 'Teman sudah mengingatkan phishing' },
       ],
       answer: 'Social Engineering',
@@ -376,8 +376,8 @@ function generateSmishingCase() {
       brief: `${name} menerima SMS pemenang undian yang meminta klaim hadiah melalui link.`,
       clues: [
         { id: 'clue_1', element: 'msg_0', description: 'Undian yang tidak pernah diikuti' },
-        { id: 'clue_2', element: 'msg_0', description: 'Link ke domain tidak dikenal' },
-        { id: 'clue_3', element: 'msg_2', description: 'Keluarga mengingatkan penipuan' },
+        { id: 'clue_2', element: 'msg_2', description: 'Keluarga mengingatkan penipuan' },
+        { id: 'clue_3', element: 'msg_3', description: 'Korban masih ragu tapi penasaran' },
       ],
       answer: 'Social Engineering',
     },
@@ -390,8 +390,8 @@ function generateSmishingCase() {
       ],
       brief: `${name} menerima SMS palsu dari 'GOJEK' yang mengaku ada paket gagal dikirim.`,
       clues: [
-        { id: 'clue_1', element: 'msg_0', description: 'Tidak pernah pesan barang' },
-        { id: 'clue_2', element: 'msg_0', description: 'URL bukan domain resmi Gojek' },
+        { id: 'clue_1', element: 'msg_0', description: 'URL bukan domain resmi Gojek' },
+        { id: 'clue_2', element: 'msg_1', description: 'Korban tidak pesan tapi penasaran' },
         { id: 'clue_3', element: 'msg_2', description: 'Teman sarankan cek di aplikasi' },
       ],
       answer: 'Social Engineering',
@@ -512,8 +512,8 @@ function generateVishingCase() {
       ],
       brief: `${name} menerima telepon dari seseorang yang mengaku CS bank dan meminta data pribadi.`,
       clues: [
-        { id: 'clue_1', element: 'msg_2', description: 'Meminta data pribadi via telepon' },
-        { id: 'clue_2', element: 'msg_2', description: 'Menciptakan situasi panik' },
+        { id: 'clue_1', element: 'msg_0', description: 'Tidak ada verifikasi identitas' },
+        { id: 'clue_2', element: 'msg_2', description: 'Meminta data pribadi via telepon' },
         { id: 'clue_3', element: 'msg_3', description: 'Korban langsung memberikan data' },
       ],
     },
@@ -526,9 +526,9 @@ function generateVishingCase() {
       ],
       brief: `${name} menerima telepon dari 'Telkom' yang mengaku ada tunggakan dan meminta transfer.`,
       clues: [
-        { id: 'clue_1', element: 'msg_2', description: 'Meminta transfer ke rekening pribadi' },
-        { id: 'clue_2', element: 'msg_0', description: 'Tidak ada verifikasi identitas' },
-        { id: 'clue_3', element: 'msg_2', description: 'Ancaman pemutusan layanan' },
+        { id: 'clue_1', element: 'msg_0', description: 'Tidak ada verifikasi identitas' },
+        { id: 'clue_2', element: 'msg_2', description: 'Ancaman pemutusan layanan' },
+        { id: 'clue_3', element: 'msg_3', description: 'Korban langsung transfer tanpa verifikasi' },
       ],
     },
     {
@@ -540,9 +540,9 @@ function generateVishingCase() {
       ],
       brief: `${name} menerima telepon dari 'polisi' yang mengaku ada tilang dan meminta pembayaran segera.`,
       clues: [
-        { id: 'clue_1', element: 'msg_2', description: 'Meminta bayar ke rekening pribadi' },
+        { id: 'clue_1', element: 'msg_0', description: 'Polisi tidak pernah telepon minta bayar' },
         { id: 'clue_2', element: 'msg_2', description: 'Ancaman denda yang tidak wajar' },
-        { id: 'clue_3', element: 'msg_0', description: 'Polisi tidak pernah telepon minta bayar' },
+        { id: 'clue_3', element: 'msg_3', description: 'Korban langsung bayar tanpa verifikasi' },
       ],
     },
   ]
@@ -877,9 +877,9 @@ function generateCEOFraudCase() {
       messages: scenario.messages,
     },
     clues: [
-      { id: 'clue_1', element: 'msg_2', description: 'Permintaan transfer sangat besar' },
-      { id: 'clue_2', element: 'msg_2', description: 'Tekanan kerahasiaan tinggi' },
-      { id: 'clue_3', element: 'msg_0', description: 'Tidak ada verifikasi identitas CEO' },
+      { id: 'clue_1', element: 'msg_0', description: 'Tidak ada verifikasi identitas CEO' },
+      { id: 'clue_2', element: 'msg_2', description: 'Permintaan transfer sangat besar' },
+      { id: 'clue_3', element: 'msg_3', description: 'Karyawan langsung menurut tanpa konfirmasi' },
     ],
     answer: 'Social Engineering',
     choices: ['Phishing Attack', 'Malware Distribution', 'Social Engineering', 'Legitimate Request'],
