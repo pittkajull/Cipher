@@ -76,7 +76,7 @@ export default function AgentSetup() {
       y: -20,
       duration: 0.4,
       ease: 'power2.in',
-      onComplete: () => navigate('/cases'),
+      onComplete: () => navigate('/briefing'),
     })
   }
 
