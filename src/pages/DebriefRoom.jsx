@@ -24,13 +24,15 @@ export default function DebriefRoom() {
       return
     }
 
-    // Save updated XP
-    const updatedAgent = {
-      ...agent,
-      xp: (agent.xp || 0) + xpGained,
-      casesCompleted: (agent.casesCompleted || 0) + 1,
+    // Save updated XP only if correct or first attempt
+    if (isCorrect) {
+      const updatedAgent = {
+        ...agent,
+        xp: (agent.xp || 0) + xpGained,
+        casesCompleted: (agent.casesCompleted || 0) + 1,
+      }
+      saveAgent(updatedAgent)
     }
-    saveAgent(updatedAgent)
 
     setTimeout(() => setVisible(true), 100)
   }, [])
@@ -51,6 +53,10 @@ export default function DebriefRoom() {
 
   function handleReturn() {
     navigate('/cases')
+  }
+
+  function handleTryAgain() {
+    navigate('/investigate', { state: { caseData, agent } })
   }
 
   return (
@@ -135,7 +141,9 @@ export default function DebriefRoom() {
         <div className="bg-[#0d1117] border border-[#1e2d3d] rounded-lg p-5 mb-4">
           <div className="flex items-center justify-between mb-3">
             <div className="font-mono text-xs text-[#00b4d8] tracking-widest">XP GAINED</div>
-            <div className="font-mono text-2xl text-[#00ff88] font-bold">+{xpGained}</div>
+            <div className={`font-mono text-2xl font-bold ${isCorrect ? 'text-[#00ff88]' : 'text-[#ff3d3d]'}`}>
+              {isCorrect ? `+${xpGained}` : '+0'}
+            </div>
           </div>
 
           {/* Rank progress */}
@@ -190,9 +198,17 @@ export default function DebriefRoom() {
 
         {/* Actions */}
         <div className="flex gap-3">
+          {!isCorrect && (
+            <button
+              onClick={handleTryAgain}
+              className="flex-1 font-mono text-sm tracking-widest bg-[#ff3d3d] text-white py-3.5 rounded hover:bg-[#ff5555] active:scale-[0.98] transition-all cursor-pointer font-semibold"
+            >
+              🔄 TRY AGAIN
+            </button>
+          )}
           <button
             onClick={handleNextCase}
-            className="flex-1 font-mono text-sm tracking-widest bg-[#00b4d8] text-[#080b0f] py-3.5 rounded hover:bg-[#00c8f0] active:scale-[0.98] transition-all cursor-pointer font-semibold"
+            className={`flex-1 font-mono text-sm tracking-widest bg-[#00b4d8] text-[#080b0f] py-3.5 rounded hover:bg-[#00c8f0] active:scale-[0.98] transition-all cursor-pointer font-semibold ${!isCorrect ? '' : ''}`}
           >
             NEXT CASE
           </button>

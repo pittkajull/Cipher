@@ -1,17 +1,119 @@
 import { useState, useRef, useEffect } from 'react'
-import { gsap } from 'gsap'
-import { callGemini } from '../hooks/useGemini'
 
-const ARIA_SYSTEM = `Kamu adalah ARIA (Advanced Response Intelligence Agent), AI briefing officer di CIPHER Agency.
-Karaktermu: profesional, singkat, sedikit misterius, seperti karakter di film spy/thriller.
-Kamu TIDAK pernah bertele-tele. Maksimal 2-3 kalimat per respons.
-Kamu memanggil user sebagai "Agen" bukan nama mereka.
-Kamu berbicara dalam bahasa Indonesia dengan sedikit istilah teknis.
-Kamu membimbing tanpa memberi jawaban langsung.
-Contoh gaya bicara:
-- "Agen, perhatikan domain emailnya. Ada yang tidak biasa."
-- "Intel menunjukkan anomali di attachment ini. Selidiki lebih lanjut."
-- "Kamu sudah dekat. Satu clue lagi sebelum kamu bisa submit laporan."`
+function getARIAReply(message, caseData, foundClues) {
+  const msg = message.toLowerCase()
+  const clues = caseData.clues || []
+  const evidence = caseData.evidence || {}
+  const unfound = clues.filter(c => !foundClues.includes(c.id))
+
+  // Help / lost
+  if (msg.match(/help|bantuan|bingung|gimana|cara|apa yang harus|ngapain/)) {
+    if (unfound.length >= 3) {
+      return `Oke, santai aja dulu. Coba perhatiin ${evidence.type === 'email' ? 'alamat email pengirimnya' : evidence.type === 'chat' ? 'siapa yang ngirim pesan pertama' : 'URL di address bar'}. Ada yang aneh gak?`
+    }
+    if (unfound.length >= 1) {
+      return `Kamu udah di jalur yang bener. Sekarang coba perhatiin ${unfound[0].element.includes('body') || unfound[0].element.includes('msg') ? 'isi pesannya lebih teliti' : 'elemen yang belum kamu klik'}. Ada satu lagi yang luput.`
+    }
+    return 'Clue udah lengkap! Sekarang tinggal tentuin ini jenis serangan apa. Percaya sama instingmu.'
+  }
+
+  // Clue / hint request
+  if (msg.match(/clue|petunjuk|hint|anjuran|tolong kasih tau/)) {
+    if (unfound.length > 0) {
+      const target = unfound[0]
+      const hints = {
+        from_email: 'Coba perhatiin alamat emailnya. Beneran dari perusahaan resmi gak?',
+        from_name: 'Siapa yang ngirim? Kenal gak?',
+        subject: 'Subjek emailnya mencurigakan gak?',
+        body: 'Baca lagi isi emailnya. Ada yang aneh?',
+        cta_url: 'Link yang dikasih, itu ke mana arahnya?',
+        cta_text: 'Tombolnya ngajak ngapain?',
+        url: 'URL-nya beneran situs resmi?',
+        hero_title: 'Judul halamannya normal gak?',
+        hero_body: 'Isi halaman ngajak ngapain?',
+        footer: 'Cek footer-nya. Ada yang janggal?',
+        submit_text: 'Tombol submit-nya mencurigakan gak?',
+        msg_0: 'Coba baca pesan pertama lagi. Siapa yang ngirim?',
+        msg_1: 'Perhatiin pesan kedua. Responnya gimana?',
+        msg_2: 'Pesan ketiga ini penting. Ada yang aneh?',
+        msg_3: 'Pesan keempat. Gimana reaksi penerimanya?',
+      }
+      const hint = hints[target.element] || `Coba klik elemen yang belum kamu periksa.`
+      return `Masih ada ${unfound.length} clue yang ketangkep. ${hint}`
+    }
+    return 'Clue udah ketemu semua, Agen. Sekarang tinggal pilih jawaban yang tepat.'
+  }
+
+  // Phishing
+  if (msg.match(/phishing|phising|email palsu/)) {
+    if (caseData.answer === 'Phishing Attack') return 'Hmm, kayanya kamu udah nemu jawabannya. Coba verifikasi lagi deh.'
+    return 'Phishing? Coba pikirin lagi deh. Ada elemen lain yang lebih mencurigakan.'
+  }
+
+  // Malware
+  if (msg.match(/malware|virus|trojan|ransomware|berbahaya/)) {
+    if (caseData.answer === 'Malware Distribution') return 'Kayanya bener nih. Perhatiin lagi file atau link-nya.'
+    return 'Malware? Bisa jadi, tapi cek lagi deh. Apakah ada file mencurigakan?'
+  }
+
+  // Social engineering
+  if (msg.match(/social engineering|manipulasi|tipu|scam|penipuan/)) {
+    if (caseData.answer === 'Social Engineering') return 'Instingmu tajem. Perhatiin cara mereka manipulasi korbannya.'
+    return 'Social engineering emang berbahaya. Tapi cek lagi deh, ada yang lebih spesifik?'
+  }
+
+  // Sender / who
+  if (msg.match(/siapa|pengirim|dari siapa|who|namanya/)) {
+    if (evidence.type === 'email') return `Pengirimnya ${evidence.from_name} (${evidence.from_email}). Kenal gak?`
+    if (evidence.type === 'chat') return `Coba perhatiin siapa yang mulai percakapan. Dia ngaku-ngaku siapa?`
+    return `Perhatiin baik-baik siapa yang bikin website ini. Resmi gak?`
+  }
+
+  // URL / link
+  if (msg.match(/url|link|website|domain|situs|alamat/)) {
+    if (evidence.url) return `URL-nya: ${evidence.url}. Coba bandiin sama URL resmi. Mirip tapi beda, kan?`
+    if (evidence.cta_url) return `Link-nya: ${evidence.cta_url}. Perhatiin domainnya, beneran resmi?`
+    return 'Cek URL-nya teliti. Seringkali beda cuma satu huruf aja dari URL asli.'
+  }
+
+  // Time
+  if (msg.match(/waktu|time|cepat|buru|kejar/)) {
+    return 'Santai tapi fokus, Agen. Jangan gegara buru-buru malah salah tebak.'
+  }
+
+  // Submit
+  if (msg.match(/submit|laporkan|selesai|done|finish|jawab/)) {
+    if (foundClues.length < 2) return `Belum bisa submit, Agen. Kamu baru nemuin ${foundClues.length} clue, minimal 2.`
+    return 'Oke, kalau udah yakin tinggal pilih jenis serangan terus klik SUBMIT REPORT.'
+  }
+
+  // Thanks
+  if (msg.match(/terima kasih|thanks|makasih|thx|mantap/)) {
+    return 'Sip, lanjutkan misinya!'
+  }
+
+  // Who is ARIA
+  if (msg.match(/siapa kamu|aria|kamu siapa|kamu ai|kamu robot/)) {
+    return 'Aku ARIA, asisten analisamu di CIPHER. Tugasku bimbing kamu, bukan kasih jawaban langsung.'
+  }
+
+  // Wrong answer context
+  if (msg.match(/salah|gagal|rugi|kurang/)) {
+    return 'Gak apa-apa, Agen. Yang penting kamu belajar dari situ. Coba lagi!'
+  }
+
+  // General what to do
+  if (msg.match(/apa|what|kenapa|why|gimana|how/)) {
+    if (unfound.length > 0) return `Kamu masih perlu nemuin ${unfound.length} clue lagi. Coba klik elemen yang belum diperiksa.`
+    if (foundClues.length >= 2) return 'Clue udah cukup. Sekarang pilih jenis serangan yang tepat terus submit.'
+    return 'Perhatiin bukti di depanmu. Klik elemen yang menurutmu aneh atau mencurigakan.'
+  }
+
+  // Default
+  if (unfound.length > 0) return `Masih ada ${unfound.length} clue yang belum ketemu. Coba perhatiin lagi deh.`
+  if (foundClues.length >= 2) return 'Udah cukup cluenya. Sekarang tinggal pilih jawaban yang bener.'
+  return 'Perhatiin baik-baik bukti di depanmu, Agen. Ada yang janggal.'
+}
 
 export default function ARIAChat({ caseData, foundClues, onUseARIA, ariaComment }) {
   const [messages, setMessages] = useState([])
@@ -19,35 +121,18 @@ export default function ARIAChat({ caseData, foundClues, onUseARIA, ariaComment 
   const [loading, setLoading] = useState(false)
   const endRef = useRef(null)
   const inputRef = useRef(null)
-  const dotRef = useRef(null)
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // ARIA typing indicator animation
-  useEffect(() => {
-    if (!dotRef.current) return
-    const ctx = gsap.context(() => {
-      gsap.to('.aria-dot', {
-        opacity: 0,
-        duration: 0.4,
-        stagger: 0.15,
-        repeat: -1,
-        yoyo: true,
-      })
-    }, dotRef)
-    return () => ctx.revert()
-  }, [])
-
-  // Show ARIA auto-comment
   useEffect(() => {
     if (ariaComment) {
       setMessages((prev) => [...prev, { role: 'assistant', content: ariaComment }])
     }
   }, [ariaComment])
 
-  async function handleSend(e) {
+  function handleSend(e) {
     e.preventDefault()
     const msg = input.trim()
     if (!msg || loading) return
@@ -58,48 +143,12 @@ export default function ARIAChat({ caseData, foundClues, onUseARIA, ariaComment 
     setMessages(newMessages)
     setLoading(true)
 
-    try {
-      const clueContext = foundClues.length > 0
-        ? `\nClue yang sudah ditemukan: ${foundClues.join(', ')}`
-        : '\nBelum ada clue yang ditemukan.'
-
-      const prompt = `${ARIA_SYSTEM}
-
-Konteks kasus: ${caseData.case_id} — ${caseData.codename}
-Threat level: ${caseData.threat_level}
-Brief: ${caseData.brief}
-${clueContext}
-
-Riwayat chat:
-${newMessages.map((m) => `${m.role === 'user' ? 'Agen' : 'ARIA'}: ${m.content}`).join('\n')}
-
-Agen: ${msg}
-
-Balas sebagai ARIA. Maksimal 2-3 kalimat. Jangan beri jawaban langsung, bimbing Agen.`
-
-      let reply
-      try {
-        reply = await callGemini(prompt)
-      } catch {
-        // Fallback ARIA responses
-        const fallbacks = [
-          "Agen, fokus pada elemen yang mencurigakan. Perhatikan detail yang tidak biasa.",
-          "Intel menunjukkan anomali. Cek kembali URL dan pengirimnya.",
-          "Kamu sudah dekat. Periksa lagi elemen yang belum kamu selidiki.",
-          "Instingmu bagus, Agen. Terus gali lebih dalam.",
-        ]
-        reply = fallbacks[Math.floor(Math.random() * fallbacks.length)]
-      }
+    setTimeout(() => {
+      const reply = getARIAReply(msg, caseData, foundClues)
       setMessages((prev) => [...prev, { role: 'assistant', content: reply }])
-    } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: 'Koneksi terganggu. Coba lagi, Agen.' },
-      ])
-    } finally {
       setLoading(false)
       inputRef.current?.focus()
-    }
+    }, 600 + Math.random() * 800)
   }
 
   return (
@@ -123,8 +172,14 @@ Balas sebagai ARIA. Maksimal 2-3 kalimat. Jangan beri jawaban langsung, bimbing 
         {messages.length === 0 && (
           <div className="text-center py-6">
             <div className="text-2xl mb-2">🤖</div>
-            <p className="font-mono text-xs text-[#4a5568]">Tanya ARIA untuk petunjuk.</p>
+            <p className="font-mono text-xs text-[#4a5568]">Tanya ARIA kalau butuh petunjuk.</p>
             <p className="font-mono text-[10px] text-[#4a5568]/50 mt-1">Menggunakan ARIA = -50 XP</p>
+            <div className="mt-3 text-left space-y-1">
+              <p className="font-mono text-[10px] text-[#4a5568]/70">Contoh:</p>
+              <p className="font-mono text-[10px] text-[#00b4d8]/50">"Gimana cara mainnya?"</p>
+              <p className="font-mono text-[10px] text-[#00b4d8]/50">"Kasih hint dong"</p>
+              <p className="font-mono text-[10px] text-[#00b4d8]/50">"Siapa pengirimnya?"</p>
+            </div>
           </div>
         )}
 
@@ -149,7 +204,7 @@ Balas sebagai ARIA. Maksimal 2-3 kalimat. Jangan beri jawaban langsung, bimbing 
         ))}
 
         {loading && (
-          <div ref={dotRef} className="mr-4">
+          <div className="mr-4">
             <div className="flex items-center gap-1 mb-1">
               <span className="text-[10px]">🤖</span>
               <span className="font-mono text-[10px] text-[#00b4d8]">ARIA</span>

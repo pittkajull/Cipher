@@ -910,7 +910,7 @@ export function generateRandomCases() {
     generateCEOFraudCase,
   ]
 
-  // Shuffle and pick 5 random cases
+  // Shuffle and pick 8 random cases
   const shuffled = allGenerators.sort(() => Math.random() - 0.5)
-  return shuffled.slice(0, 5).map((gen) => gen())
+  return shuffled.slice(0, 8).map((gen) => gen())
 }
