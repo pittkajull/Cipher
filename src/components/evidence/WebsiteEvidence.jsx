@@ -38,21 +38,21 @@ export default function WebsiteEvidence({ evidence, clues, onClueFound, onWrongC
   return (
     <div className="bg-[#0d1117] border border-[#1e2d3d] rounded-lg overflow-hidden">
       {/* Browser chrome */}
-      <div className="bg-[#111820] border-b border-[#1e2d3d] px-4 py-2">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
+      <div className="bg-[#111820] border-b border-[#1e2d3d] px-3 sm:px-4 py-2">
+        <div className="flex items-center justify-between mb-2 gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <div className="flex gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full bg-[#ff3d3d]/60" />
               <div className="w-2.5 h-2.5 rounded-full bg-[#f4a522]/60" />
               <div className="w-2.5 h-2.5 rounded-full bg-[#00ff88]/60" />
             </div>
-            <span className="font-mono text-[10px] text-[#00b4d8] tracking-widest">WEBSITE EVIDENCE</span>
+            <span className="font-mono text-[10px] text-[#00b4d8] tracking-widest hidden sm:inline">WEBSITE EVIDENCE</span>
           </div>
-          <span className="font-mono text-[10px] text-[#f4a522] animate-pulse">🔍 Klik elemen yang mencurigakan</span>
+          <span className="font-mono text-[10px] text-[#f4a522] animate-pulse text-right">🔍 Klik yang mencurigakan</span>
         </div>
         <div className="flex items-center gap-2 mb-2">
           <div
-            className="flex-1 bg-[#080b0f] rounded px-3 py-1 font-mono text-xs"
+            className="flex-1 bg-[#080b0f] rounded px-3 py-1 font-mono text-xs overflow-x-auto whitespace-nowrap"
             style={{
               ...getStyle('url'),
               color: isWrong('url') ? '#ff3d3d' : isSuspicious ? '#ff3d3d' : '#00ff88',
@@ -65,11 +65,11 @@ export default function WebsiteEvidence({ evidence, clues, onClueFound, onWrongC
         </div>
         {/* Navbar */}
         {evidence.navbar_items && (
-          <div className="flex items-center gap-4 px-2">
+          <div className="flex items-center gap-3 sm:gap-4 px-2 overflow-x-auto">
             {evidence.navbar_items.map((item, i) => (
               <span
                 key={i}
-                className="font-mono text-[10px] text-[#4a5568]"
+                className="font-mono text-[10px] text-[#4a5568] shrink-0"
                 style={getStyle(`nav_${i}`)}
                 onClick={() => handleClick(`nav_${i}`)}
               >

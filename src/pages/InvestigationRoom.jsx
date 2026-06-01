@@ -258,9 +258,9 @@ export default function InvestigationRoom() {
 
             {/* Answer Choices */}
             {!submitted && (
-              <div className="mt-4 bg-[#0d1117] border border-[#1e2d3d] rounded-lg p-5">
+              <div className="mt-4 bg-[#0d1117] border border-[#1e2d3d] rounded-lg p-4 sm:p-5">
                 <div className="font-mono text-xs text-[#00b4d8] tracking-widest mb-3">SUBMIT VERDICT</div>
-                <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-4">
                   {caseData.choices?.map((choice) => (
                     <button
                       key={choice}

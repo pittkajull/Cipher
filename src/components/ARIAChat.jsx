@@ -152,7 +152,7 @@ export default function ARIAChat({ caseData, foundClues, onUseARIA, ariaComment 
   }
 
   return (
-    <div className="bg-[#0d1117] border border-[#1e2d3d] rounded-lg overflow-hidden flex flex-col h-[400px]">
+    <div className="bg-[#0d1117] border border-[#1e2d3d] rounded-lg overflow-hidden flex flex-col h-[300px] sm:h-[400px]">
       {/* Header */}
       <div className="px-4 py-3 border-b border-[#1e2d3d] flex items-center gap-2 bg-[#111820]/50">
         <div className="relative">

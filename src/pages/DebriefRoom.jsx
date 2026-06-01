@@ -168,21 +168,21 @@ export default function DebriefRoom() {
           )}
 
           {/* Stats row */}
-          <div className="grid grid-cols-4 gap-3 mt-4 pt-3 border-t border-[#1e2d3d]">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-3 border-t border-[#1e2d3d]">
             <div className="text-center">
-              <div className="font-mono text-xs text-[#4a5568]">Time</div>
+              <div className="font-mono text-[11px] text-[#4a5568]">Time</div>
               <div className="font-mono text-sm text-[#8892a4]">{Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</div>
             </div>
             <div className="text-center">
-              <div className="font-mono text-xs text-[#4a5568]">Clues</div>
+              <div className="font-mono text-[11px] text-[#4a5568]">Clues</div>
               <div className="font-mono text-sm text-[#8892a4]">{foundClues.length}/{caseData.clues?.length || 0}</div>
             </div>
             <div className="text-center">
-              <div className="font-mono text-xs text-[#4a5568]">Wrong</div>
+              <div className="font-mono text-[11px] text-[#4a5568]">Wrong</div>
               <div className={`font-mono text-sm ${wrongCount > 0 ? 'text-[#ff3d3d]' : 'text-[#8892a4]'}`}>{wrongCount}</div>
             </div>
             <div className="text-center">
-              <div className="font-mono text-xs text-[#4a5568]">ARIA</div>
+              <div className="font-mono text-[11px] text-[#4a5568]">ARIA</div>
               <div className="font-mono text-sm text-[#8892a4]">{usedARIA ? 'Used' : 'None'}</div>
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function DebriefRoom() {
         )}
 
         {/* Actions */}
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           {!isCorrect && (
             <button
               onClick={handleTryAgain}
@@ -208,7 +208,7 @@ export default function DebriefRoom() {
           )}
           <button
             onClick={handleNextCase}
-            className={`flex-1 font-mono text-sm tracking-widest bg-[#00b4d8] text-[#080b0f] py-3.5 rounded hover:bg-[#00c8f0] active:scale-[0.98] transition-all cursor-pointer font-semibold ${!isCorrect ? '' : ''}`}
+            className="flex-1 font-mono text-sm tracking-widest bg-[#00b4d8] text-[#080b0f] py-3.5 rounded hover:bg-[#00c8f0] active:scale-[0.98] transition-all cursor-pointer font-semibold"
           >
             NEXT CASE
           </button>

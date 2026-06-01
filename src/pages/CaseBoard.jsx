@@ -157,20 +157,20 @@ export default function CaseBoard() {
         }}
       >
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
             <div>
               <div className="inline-flex items-center gap-2 bg-[#00b4d8]/10 border border-[#00b4d8]/20 rounded px-3 py-1 mb-3">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#00b4d8] animate-pulse" />
                 <span className="font-mono text-[10px] text-[#00b4d8] tracking-widest">CASE BOARD</span>
               </div>
-              <h1 className="font-mono text-xl text-[#e2e8f0]">
+              <h1 className="font-mono text-lg sm:text-xl text-[#e2e8f0]">
                 {'// ACTIVE CASES — '}
                 <span className="text-[#00b4d8]">{loading ? '...' : cases.length}</span>
                 {' PENDING'}
               </h1>
             </div>
-            <div className="text-right">
+            <div className="sm:text-right">
               <div className="font-mono text-xs text-[#4a5568]">AGENT</div>
               <div className="font-mono text-sm text-[#e2e8f0]">{agent.codename}</div>
               <div className="font-mono text-[10px] text-[#00b4d8]">{rank.icon} {rank.name}</div>

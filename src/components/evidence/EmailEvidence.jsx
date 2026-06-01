@@ -36,32 +36,34 @@ export default function EmailEvidence({ evidence, clues, onClueFound, onWrongCli
   return (
     <div className="bg-[#0d1117] border border-[#1e2d3d] rounded-lg overflow-hidden">
       {/* Header + Hint */}
-      <div className="bg-[#111820] border-b border-[#1e2d3d] px-5 py-3">
-        <div className="flex items-center justify-between mb-2">
-          <span className="font-mono text-[10px] text-[#00b4d8] tracking-widest">EMAIL EVIDENCE</span>
-          <span className="font-mono text-[10px] text-[#f4a522] animate-pulse">🔍 Klik elemen yang mencurigakan</span>
+      <div className="bg-[#111820] border-b border-[#1e2d3d] px-3 sm:px-5 py-3">
+        <div className="flex items-center justify-between mb-2 gap-2">
+          <span className="font-mono text-[10px] text-[#00b4d8] tracking-widest shrink-0">EMAIL EVIDENCE</span>
+          <span className="font-mono text-[10px] text-[#f4a522] animate-pulse text-right">🔍 Klik yang mencurigakan</span>
         </div>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="font-mono text-xs text-[#4a5568] w-12">From:</span>
-          <span
-            className="font-mono text-sm text-[#e2e8f0]"
-            style={getStyle('from_name')}
-            onClick={() => handleClick('from_name')}
-          >
-            {evidence.from_name}
-          </span>
-          <span
-            className="font-mono text-xs text-[#ff3d3d]"
-            style={getStyle('from_email')}
-            onClick={() => handleClick('from_email')}
-          >
-            &lt;{evidence.from_email}&gt;
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
+          <span className="font-mono text-xs text-[#4a5568] w-12 shrink-0">From:</span>
+          <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+            <span
+              className="font-mono text-sm text-[#e2e8f0] truncate"
+              style={getStyle('from_name')}
+              onClick={() => handleClick('from_name')}
+            >
+              {evidence.from_name}
+            </span>
+            <span
+              className="font-mono text-xs text-[#ff3d3d] truncate"
+              style={getStyle('from_email')}
+              onClick={() => handleClick('from_email')}
+            >
+              &lt;{evidence.from_email}&gt;
+            </span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-[#4a5568] w-12">Subj:</span>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+          <span className="font-mono text-xs text-[#4a5568] w-12 shrink-0">Subj:</span>
           <span
-            className="font-mono text-sm text-[#e2e8f0] font-semibold"
+            className="font-mono text-sm text-[#e2e8f0] font-semibold truncate"
             style={getStyle('subject')}
             onClick={() => handleClick('subject')}
           >
